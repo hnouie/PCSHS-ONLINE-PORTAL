@@ -1,0 +1,3610 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasay City South High School - Integrated Grading Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #3b82f6;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --white: #ffffff;
+            --written-works: #8b5cf6;
+            --performance-tasks: #06b6d4;
+            --quarterly: #f59e0b;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .loading-screen.active {
+            display: flex;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Lockout Screen */
+        .lockout-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .lockout-screen.active {
+            display: flex;
+        }
+
+        .lockout-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: var(--danger);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .lockout-timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 20px 0;
+            font-family: monospace;
+        }
+
+        /* Login Page Styles */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            background: linear-gradient(rgba(30, 64, 175, 0.8), rgba(30, 58, 138, 0.9));
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1200px;
+            width: 100%;
+            min-height: 650px;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease;
+        }
+
+        .login-sidebar {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--secondary) 100%);
+            padding: 60px 50px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .school-logo-container {
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            border: 5px solid rgba(255,255,255,0.3);
+        }
+
+        .school-logo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .school-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-align: center;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .school-motto {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            text-align: center;
+            z-index: 1;
+            font-style: italic;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .decoration {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .decoration:nth-child(1) { top: -150px; right: -150px; animation-delay: 0s; }
+        .decoration:nth-child(2) { bottom: -100px; left: -100px; width: 200px; height: 200px; animation-delay: 2s; }
+
+        .login-form-section {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .welcome-text {
+            margin-bottom: 30px;
+        }
+
+        .welcome-text h2 {
+            font-size: 2.2rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-text p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 35px;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #6b7280;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .role-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(30deg);
+            transition: all 0.6s;
+        }
+
+        .login-btn:hover::after {
+            left: 100%;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .demo-accounts {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: var(--dark);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .demo-accounts strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .demo-account-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            border-left: 4px solid var(--danger);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+            padding: 30px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 25px 30px;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 25px;
+        }
+
+        .profile-image-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #e0e7ff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .user-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            color: #6b7280;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 300px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.9rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            padding: 12px 25px;
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 28px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--primary); }
+        .stat-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--success); }
+        .stat-icon.orange { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: var(--accent); }
+        .stat-icon.red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
+        .stat-icon.purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: var(--written-works); }
+        .stat-icon.cyan { background: linear-gradient(135deg, #cffafe, #a5f3fc); color: var(--performance-tasks); }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            color: var(--success);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 25px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 18px;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .data-table tr {
+            transition: all 0.3s;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8fafc;
+            transform: scale(1.01);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .data-table td {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e0e7ff;
+        }
+
+        .grade-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .grade-outstanding { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; }
+        .grade-very-satisfactory { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
+        .grade-satisfactory { background: linear-gradient(135deg, #fef9c3, #fde047); color: #854d0e; }
+        .grade-fairly { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #9a3412; }
+        .grade-failed { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .icon-btn.edit {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .icon-btn.delete {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .icon-btn.view {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .icon-btn.submit {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s ease;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .close-btn:hover {
+            background: #fee2e2;
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .image-upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+            margin-bottom: 25px;
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--secondary);
+            background: #eff6ff;
+        }
+
+        .image-upload-area.has-image {
+            border-style: solid;
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .upload-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #64748b;
+            background: #f1f5f9;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            background: #e2e8f0;
+            color: var(--dark);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            transition: width 0.8s ease;
+            box-shadow: 0 2px 10px rgba(30, 64, 175, 0.3);
+        }
+
+        .subject-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.3s;
+        }
+
+        .subject-row:hover {
+            background: #f8fafc;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 12px;
+        }
+
+        .subject-info h4 {
+            color: var(--dark);
+            margin-bottom: 6px;
+            font-size: 1.1rem;
+        }
+
+        .subject-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .subject-grade {
+            text-align: right;
+        }
+
+        .subject-grade .grade {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .profile-image-large {
+            width: 180px;
+            height: 180px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 4px solid #e0e7ff;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .profile-details h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .profile-details .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .section-content {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .grading-scale-legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 968px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+            .login-sidebar {
+                display: none;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            width: 300px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        /* Activity/Task Styles */
+        .activity-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .activity-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .activity-card.submitted {
+            border-left-color: var(--success);
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+        }
+
+        .activity-card.graded {
+            border-left-color: var(--accent);
+            background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+        }
+
+        .activity-card.late {
+            border-left-color: var(--danger);
+            opacity: 0.8;
+        }
+
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .activity-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .activity-meta {
+            display: flex;
+            gap: 15px;
+            color: #64748b;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .activity-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .activity-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-written { background: #ede9fe; color: #7c3aed; }
+        .badge-performance { background: #cffafe; color: #0891b2; }
+        .badge-quarterly { background: #ffedd5; color: #c2410c; }
+
+        .activity-description {
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .activity-files {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .file-attachment {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .activity-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .deadline-warning {
+            color: var(--danger);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .submission-area {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px dashed #e2e8f0;
+        }
+
+        .submission-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 15px;
+        }
+
+        .submission-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        .feedback-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .feedback-text {
+            color: #1e40af;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .grade-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .grade-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .grade-details {
+            flex: 1;
+        }
+
+        /* Schedule Styles */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .schedule-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .schedule-time {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .schedule-subject {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+
+        .schedule-subject:hover {
+            border-color: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .schedule-subject .subject-name {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .schedule-subject .teacher-name {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* Class Record Sheet Styles */
+        .class-record-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .class-record-table th,
+        .class-record-table td {
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .class-record-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #64748b;
+            font-size: 0.75rem;
+        }
+
+        .class-record-table .student-name-col {
+            min-width: 200px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .class-record-table .component-header {
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+            color: #7c3aed;
+            font-weight: 700;
+        }
+
+        .class-record-table .total-col {
+            background: #f0f9ff;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .score-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .score-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: #eff6ff;
+        }
+
+        .component-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .component-tab {
+            padding: 15px 25px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            flex: 1;
+        }
+
+        .component-tab.active {
+            border-color: var(--primary);
+            background: #eff6ff;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.1);
+        }
+
+        .component-tab .tab-title {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .component-tab .tab-weight {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .component-tab.written.active { border-color: var(--written-works); background: #f5f3ff; }
+        .component-tab.performance.active { border-color: var(--performance-tasks); background: #ecfeff; }
+        .component-tab.quarterly.active { border-color: var(--quarterly); background: #fff7ed; }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-submitted { background: #d1fae5; color: #065f46; }
+        .status-graded { background: #dbeafe; color: #1e40af; }
+        .status-late { background: #fee2e2; color: #991b1b; }
+
+        .real-time-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: #d1fae5;
+            color: var(--success);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Portal...</div>
+    </div>
+
+    <!-- Lockout Screen -->
+    <div id="lockoutScreen" class="lockout-screen">
+        <div class="lockout-icon">🔒</div>
+        <h2>Too Many Failed Attempts</h2>
+        <p>For security reasons, please wait before trying again.</p>
+        <div class="lockout-timer" id="lockoutTimer">05:00</div>
+        <p>Time remaining</p>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-wrapper">
+        <div class="login-container">
+            <div class="login-sidebar">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="school-logo-container">
+                    <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏫</text></svg>'">
+                </div>
+                <div class="school-name">Pasay City South<br>High School</div>
+                <div class="school-motto">"Building Futures, Shaping Leaders"</div>
+            </div>
+            
+            <div class="login-form-section">
+                <div class="welcome-text">
+                    <h2>Welcome Back! 👋</h2>
+                    <p>Please select your role and sign in to continue</p>
+                </div>
+                
+                <div class="role-selector">
+                    <button class="role-btn active" onclick="selectRole('teacher', this)">
+                        <span>👨‍🏫</span> Teacher
+                    </button>
+                    <button class="role-btn" onclick="selectRole('student', this)">
+                        <span>👨‍🎓</span> Student
+                    </button>
+                </div>
+
+                <div id="errorMessage" class="error-message">
+                    <span>⚠️</span>
+                    <span id="errorText">Invalid credentials!</span>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label id="idLabel">Teacher ID</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="userId" placeholder="Enter your ID (e.g., T001)" required>
+                            <span class="input-icon">🆔</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="Enter your password" required>
+                            <span class="input-icon">🔒</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Sign In Securely →
+                    </button>
+                </form>
+
+                <div class="divider"><span>Demo Access</span></div>
+
+                <div class="demo-accounts">
+                    <strong>📋 Try these demo accounts:</strong>
+                    <div class="demo-account-item">
+                        <span>👨‍🏫</span>
+                        <div>
+                            <strong>Teacher:</strong> ID: T001 | Pass: teacher123
+                        </div>
+                    </div>
+                    <div class="demo-account-item">
+                        <span>👨‍🎓</span>
+                        <div>
+                            <strong>Student:</strong> ID: S001 | Pass: student123
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDashboard" class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="profile-image-container">
+                    <img src="" alt="Profile" class="user-avatar" id="teacherAvatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🏫</text></svg>'">
+                    <label class="upload-btn" onclick="document.getElementById('teacherPicInput').click()">📷</label>
+                    <input type="file" id="teacherPicInput" hidden accept="image/*" onchange="updateProfilePic(this, 'teacher')">
+                </div>
+                <div class="user-name" id="teacherName">Mr. Reyes</div>
+                <div class="user-role">Mathematics Faculty</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showSection('teacherOverview', this)">
+                        <i>📊</i> Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('classRecord', this)">
+                        <i>📋</i> Class Record
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('activities', this)">
+                        <i>📝</i> Activities
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('submissions', this)">
+                        <i>📥</i> Submissions
+                        <span style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: auto;">3</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('studentList', this)">
+                        <i>👨‍🎓</i> My Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('addStudent', this)">
+                        <i>➕</i> Add Student
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('teacherProfile', this)">
+                        <i>👤</i> My Profile
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Teacher Dashboard</h1>
+                <div class="header-actions">
+                    <span class="real-time-indicator">
+                        <span class="live-dot"></span>
+                        Live
+                    </span>
+                    <span style="color: #64748b; font-weight: 500;">School Year: 2023-2024</span>
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- Teacher Overview -->
+            <div id="teacherOverview" class="section-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Total Students</div>
+                                <div class="stat-value">42</div>
+                                <div class="stat-change">↑ 3 transferees</div>
+                            </div>
+                            <div class="stat-icon blue">👨‍🎓</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Pending Activities</div>
+                                <div class="stat-value">5</div>
+                                <div class="stat-change">2 due today</div>
+                            </div>
+                            <div class="stat-icon orange">📝</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">New Submissions</div>
+                                <div class="stat-value">12</div>
+                                <div class="stat-change">Real-time updates</div>
+                            </div>
+                            <div class="stat-icon purple">📥</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">To Grade</div>
+                                <div class="stat-value">8</div>
+                                <div class="stat-change">Needs feedback</div>
+                            </div>
+                            <div class="stat-icon cyan">✓</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚡ Recent Activity</h3>
+                    </div>
+                    <div id="teacherActivityFeed">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Record Sheet (E-Class Record) -->
+            <div id="classRecord" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Class Record Sheet - Mathematics</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <select class="filter-select">
+                                <option>Grade 10 - Section A</option>
+                                <option>Grade 10 - Section B</option>
+                            </select>
+                            <select class="filter-select">
+                                <option>1st Quarter</option>
+                                <option>2nd Quarter</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="component-tabs">
+                        <div class="component-tab written active" onclick="switchComponent('written', this)">
+                            <div class="tab-title">📝 Written Works</div>
+                            <div class="tab-weight">40% of Total Grade</div>
+                        </div>
+                        <div class="component-tab performance" onclick="switchComponent('performance', this)">
+                            <div class="tab-title">🎯 Performance Tasks</div>
+                            <div class="tab-weight">40% of Total Grade</div>
+                        </div>
+                        <div class="component-tab quarterly" onclick="switchComponent('quarterly', this)">
+                            <div class="tab-title">📊 Quarterly Assessment</div>
+                            <div class="tab-weight">20% of Total Grade</div>
+                        </div>
+                    </div>
+
+                    <div id="writtenWorksTable" class="component-table">
+                        <table class="class-record-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="student-name-col">Student Name</th>
+                                    <th colspan="10" class="component-header">Written Works (WW) - 40%</th>
+                                    <th rowspan="2" class="total-col">Total WW<br>Score</th>
+                                    <th rowspan="2" class="total-col">Weighted<br>Score</th>
+                                </tr>
+                                <tr>
+                                    <th>WW1</th>
+                                    <th>WW2</th>
+                                    <th>WW3</th>
+                                    <th>WW4</th>
+                                    <th>WW5</th>
+                                    <th>WW6</th>
+                                    <th>WW7</th>
+                                    <th>WW8</th>
+                                    <th>WW9</th>
+                                    <th>WW10</th>
+                                </tr>
+                            </thead>
+                            <tbody id="writtenWorksBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="performanceTasksTable" class="component-table hidden">
+                        <table class="class-record-table">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="student-name-col">Student Name</th>
+                                    <th colspan="5" class="component-header" style="background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%); color: #0891b2;">Performance Tasks (PT) - 40%</th>
+                                    <th rowspan="2" class="total-col">Total PT<br>Score</th>
+                                    <th rowspan="2" class="total-col">Weighted<br>Score</th>
+                                </tr>
+                                <tr>
+                                    <th>PT1</th>
+                                    <th>PT2</th>
+                                    <th>PT3</th>
+                                    <th>PT4</th>
+                                    <th>PT5</th>
+                                </tr>
+                            </thead>
+                            <tbody id="performanceTasksBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="quarterlyTable" class="component-table hidden">
+                        <table class="class-record-table">
+                            <thead>
+                                <tr>
+                                    <th class="student-name-col">Student Name</th>
+                                    <th class="component-header" style="background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); color: #c2410c;">Quarterly Assessment (QA) - 20%</th>
+                                    <th class="total-col">Weighted<br>Score</th>
+                                    <th class="total-col">Initial<br>Grade</th>
+                                    <th class="total-col">Quarterly<br>Grade</th>
+                                    <th class="total-col">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quarterlyBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activities Management -->
+            <div id="activities" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📝 Learning Activities & Tasks</h3>
+                        <button class="btn btn-primary" onclick="openActivityModal()">+ Create Activity</button>
+                    </div>
+
+                    <div class="tabs">
+                        <div class="tab active" onclick="filterActivities('all', this)">All</div>
+                        <div class="tab" onclick="filterActivities('written', this)">Written Works</div>
+                        <div class="tab" onclick="filterActivities('performance', this)">Performance Tasks</div>
+                        <div class="tab" onclick="filterActivities('quarterly', this)">Quarterly</div>
+                    </div>
+
+                    <div id="activitiesList">
+                        <!-- Activities populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submissions & Real-time Monitoring -->
+            <div id="submissions" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📥 Student Submissions</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <select class="filter-select" onchange="filterSubmissions(this.value)">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="graded">Graded</option>
+                                <option value="late">Late</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="submissionsList">
+                        <!-- Real-time submissions populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student List -->
+            <div id="studentList" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">👨‍🎓 My Students</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" class="search-box" placeholder="🔍 Search students..." onkeyup="searchStudents(this.value)">
+                            <select class="filter-select">
+                                <option>All Sections</option>
+                                <option>Grade 10-A</option>
+                                <option>Grade 10-B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="data-table" id="studentTable">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>LRN</th>
+                                <th>Grade & Section</th>
+                                <th>Strand</th>
+                                <th>Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add Student (Transferee) -->
+            <div id="addStudent" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">➕ Add New Student (Transferee)</h3>
+                    </div>
+                    <form onsubmit="addNewStudent(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" id="newStudentFirstName" required placeholder="Enter first name">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" id="newStudentLastName" required placeholder="Enter last name">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>LRN (Learner Reference Number) *</label>
+                                <input type="text" id="newStudentLRN" required placeholder="e.g., 123456789012" maxlength="12">
+                            </div>
+                            <div class="form-group">
+                                <label>Student ID *</label>
+                                <input type="text" id="newStudentID" required placeholder="e.g., S002">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Grade Level *</label>
+                                <select id="newStudentGrade" required>
+                                    <option value="">Select Grade</option>
+                                    <option>Grade 7</option>
+                                    <option>Grade 8</option>
+                                    <option>Grade 9</option>
+                                    <option>Grade 10</option>
+                                    <option>Grade 11</option>
+                                    <option>Grade 12</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Section *</label>
+                                <input type="text" id="newStudentSection" required placeholder="e.g., Section A">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Strand *</label>
+                                <select id="newStudentStrand" required>
+                                    <option value="">Select Strand</option>
+                                    <option>STEM</option>
+                                    <option>ABM</option>
+                                    <option>HUMSS</option>
+                                    <option>GAS</option>
+                                    <option>TVL</option>
+                                    <option>Arts & Design</option>
+                                    <option>Sports</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>School Year *</label>
+                                <input type="text" id="newStudentSY" required placeholder="e.g., 2023-2024" value="2023-2024">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Contact Number</label>
+                                <input type="tel" id="newStudentContact" placeholder="09XX XXX XXXX">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="newStudentEmail" placeholder="student@email.com">
+                            </div>
+                        </div>
+
+                        <div class="image-upload-area" onclick="document.getElementById('newStudentPic').click()" id="studentUploadArea">
+                            <input type="file" id="newStudentPic" hidden accept="image/*" onchange="previewStudentPic(this)">
+                            <div id="uploadPlaceholder">
+                                <div style="font-size: 3rem; margin-bottom: 10px;">📷</div>
+                                <p style="font-weight: 600; color: var(--dark); margin-bottom: 5px;">Click to upload student photo</p>
+                                <p style="font-size: 0.9rem; color: #64748b;">Recommended: 1x1 or 2x2 picture</p>
+                            </div>
+                            <img id="studentPreview" class="upload-preview hidden">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">
+                            ✅ Register Student
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Teacher Profile -->
+            <div id="teacherProfile" class="section-content hidden">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div style="position: relative;">
+                            <img src="" alt="Profile" class="profile-image-large" id="teacherProfilePic" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🏫</text></svg>'">
+                            <label class="upload-btn" onclick="document.getElementById('teacherProfilePicInput').click()" style="position: absolute; bottom: 10px; right: 10px; width: 45px; height: 45px; font-size: 1.2rem;">📷</label>
+                            <input type="file" id="teacherProfilePicInput" hidden accept="image/*" onchange="updateProfilePic(this, 'teacherProfile')">
+                        </div>
+                        <div class="profile-details">
+                            <h2 id="profileTeacherName">Mr. Juan Reyes</h2>
+                            <p class="subtitle" id="profileTeacherRank">Master Teacher I</p>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Faculty Department</div>
+                                    <div class="info-value" id="profileFaculty">Mathematics Department</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Teacher Mastery</div>
+                                    <div class="info-value" id="profileMastery">Master Teacher I</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Sections Handled</div>
+                                    <div class="info-value" id="profileSections">Grade 10-A, 10-B</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Strand</div>
+                                    <div class="info-value" id="profileStrand">STEM / ABM</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">School Year</div>
+                                    <div class="info-value">2023-2024</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Contact</div>
+                                    <div class="info-value">0912 345 6789</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="profile-image-container">
+                    <img src="" alt="Profile" class="user-avatar" id="studentAvatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🎓</text></svg>'">
+                </div>
+                <div class="user-name" id="studentSidebarName">Juan Dela Cruz</div>
+                <div class="user-role" id="studentSidebarInfo">Grade 10 - STEM</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showStudentSection('studentOverview', this)">
+                        <i>📊</i> My Grades
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentActivities', this)">
+                        <i>📝</i> Activities
+                        <span style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: auto;">2</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentSchedule', this)">
+                        <i>📅</i> Schedule
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentAccount', this)">
+                        <i>⚙️</i> Account
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentProfile', this)">
+                        <i>👤</i> My Profile
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Student Portal</h1>
+                <div class="header-actions">
+                    <span style="color: #64748b; font-weight: 500;">SY: 2023-2024</span>
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- Student Overview (Grades) -->
+            <div id="studentOverview" class="section-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">General Average</div>
+                                <div class="stat-value" id="studentGenAvg">88.5</div>
+                                <div class="stat-change">With Honors 🏆</div>
+                            </div>
+                            <div class="stat-icon green">🎖️</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Written Works Avg</div>
+                                <div class="stat-value">87.3</div>
+                                <div class="stat-change">40% weight</div>
+                            </div>
+                            <div class="stat-icon purple">📝</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Performance Tasks</div>
+                                <div class="stat-value">89.1</div>
+                                <div class="stat-change">40% weight</div>
+                            </div>
+                            <div class="stat-icon cyan">🎯</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Quarterly Exam</div>
+                                <div class="stat-value">90</div>
+                                <div class="stat-change">20% weight</div>
+                            </div>
+                            <div class="stat-icon orange">📊</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Detailed Grade Breakdown</h3>
+                        <select style="padding: 10px 15px; border-radius: 10px; border: 2px solid #e2e8f0; font-weight: 600;">
+                            <option>1st Quarter</option>
+                            <option>2nd Quarter</option>
+                        </select>
+                    </div>
+                    
+                    <div id="studentGradesContainer">
+                        <!-- Grades populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Activities -->
+            <div id="studentActivities" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📝 My Learning Activities</h3>
+                        <div class="tabs">
+                            <div class="tab active" onclick="filterStudentActivities('all', this)">All</div>
+                            <div class="tab" onclick="filterStudentActivities('pending', this)">Pending</div>
+                            <div class="tab" onclick="filterStudentActivities('submitted', this)">Submitted</div>
+                            <div class="tab" onclick="filterStudentActivities('graded', this)">Graded</div>
+                        </div>
+                    </div>
+                    <div id="studentActivitiesList">
+                        <!-- Activities populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Schedule -->
+            <div id="studentSchedule" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📅 Class Schedule</h3>
+                        <select class="filter-select">
+                            <option>Regular Schedule</option>
+                            <option>Exam Schedule</option>
+                        </select>
+                    </div>
+                    
+                    <div class="schedule-grid">
+                        <div class="schedule-header">Time</div>
+                        <div class="schedule-header">Monday</div>
+                        <div class="schedule-header">Tuesday</div>
+                        <div class="schedule-header">Wednesday</div>
+                        <div class="schedule-header">Thursday</div>
+                        <div class="schedule-header">Friday</div>
+
+                        <div class="schedule-time">7:30-8:30</div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Homeroom</div>
+                            <div class="teacher-name">Ms. Cruz</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Science</div>
+                            <div class="teacher-name">Ms. Cruz</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Homeroom</div>
+                            <div class="teacher-name">Ms. Cruz</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Science</div>
+                            <div class="teacher-name">Ms. Cruz</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">ESP</div>
+                            <div class="teacher-name">Mr. Santos</div>
+                        </div>
+
+                        <div class="schedule-time">8:30-9:30</div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Mathematics</div>
+                            <div class="teacher-name">Mr. Reyes</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Filipino</div>
+                            <div class="teacher-name">Mr. Garcia</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Mathematics</div>
+                            <div class="teacher-name">Mr. Reyes</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">Filipino</div>
+                            <div class="teacher-name">Mr. Garcia</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">TLE</div>
+                            <div class="teacher-name">Mrs. Reyes</div>
+                        </div>
+
+                        <div class="schedule-time">9:30-10:00</div>
+                        <div class="schedule-subject" style="grid-column: span 5; background: #fef3c7;">
+                            <div class="subject-name">🍎 Morning Break</div>
+                        </div>
+
+                        <div class="schedule-time">10:00-11:00</div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">English</div>
+                            <div class="teacher-name">Mrs. Tan</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">AP</div>
+                            <div class="teacher-name">Ms. Lopez</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">English</div>
+                            <div class="teacher-name">Mrs. Tan</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">AP</div>
+                            <div class="teacher-name">Ms. Lopez</div>
+                        </div>
+                        <div class="schedule-subject">
+                            <div class="subject-name">MAPEH</div>
+                            <div class="teacher-name">Ms. Cruz</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Account Settings -->
+            <div id="studentAccount" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚙️ Account Settings</h3>
+                    </div>
+                    
+                    <div style="max-width: 600px;">
+                        <div class="form-group">
+                            <label>Change Profile Picture</label>
+                            <div class="image-upload-area" onclick="document.getElementById('accountPicInput').click()" style="padding: 30px;">
+                                <input type="file" id="accountPicInput" hidden accept="image/*" onchange="updateAccountPic(this)">
+                                <div id="accountUploadPlaceholder">
+                                    <div style="font-size: 3rem; margin-bottom: 10px;">📷</div>
+                                    <p style="font-weight: 600; color: var(--dark);">Click to change profile picture</p>
+                                </div>
+                                <img id="accountPreview" class="upload-preview hidden" style="width: 120px; height: 120px;">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" placeholder="Enter current password">
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" placeholder="Enter new password">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" value="juan.delacruz@student.pcshs.edu.ph">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Contact Number</label>
+                            <input type="tel" value="0912 345 6789">
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="saveAccountSettings()">
+                            💾 Save Changes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Profile -->
+            <div id="studentProfile" class="section-content hidden">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div style="position: relative;">
+                            <img src="" alt="Profile" class="profile-image-large" id="studentProfilePic" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🎓</text></svg>'">
+                        </div>
+                        <div class="profile-details">
+                            <h2 id="profileStudentName">Juan Dela Cruz</h2>
+                            <p class="subtitle" id="profileStudentSection">Grade 10 - Section A | STEM</p>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">LRN (Learner Reference Number)</div>
+                                    <div class="info-value" id="profileLRN">123456789012</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Student ID</div>
+                                    <div class="info-value" id="profileStudentID">S001</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Grade & Section</div>
+                                    <div class="info-value" id="profileGradeSection">Grade 10 - Section A</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Strand</div>
+                                    <div class="info-value" id="profileStrand">STEM</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">School Year</div>
+                                    <div class="info-value">2023-2024</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Adviser</div>
+                                    <div class="info-value" id="profileAdviser">Ms. Maria Santos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Activity Modal -->
+    <div id="activityModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Create New Activity</h2>
+                <button class="close-btn" onclick="closeActivityModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="createActivity(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Activity Title *</label>
+                            <input type="text" id="activityTitle" required placeholder="e.g., Quiz 1: Algebraic Expressions">
+                        </div>
+                        <div class="form-group">
+                            <label>Component Type *</label>
+                            <select id="activityType" required onchange="updateActivityType()">
+                                <option value="written">Written Works (WW)</option>
+                                <option value="performance">Performance Tasks (PT)</option>
+                                <option value="quarterly">Quarterly Assessment (QA)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Subject *</label>
+                            <select id="activitySubject" required>
+                                <option>Mathematics</option>
+                                <option>Science</option>
+                                <option>English</option>
+                                <option>Filipino</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Total Points/Score *</label>
+                            <input type="number" id="activityPoints" required placeholder="e.g., 100" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Deadline Date *</label>
+                            <input type="date" id="activityDeadlineDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Deadline Time *</label>
+                            <input type="time" id="activityDeadlineTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Instructions/Description *</label>
+                        <textarea id="activityDescription" rows="4" required placeholder="Provide detailed instructions for the activity..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Attachments (Optional)</label>
+                        <div class="image-upload-area" onclick="document.getElementById('activityFiles').click()" style="padding: 20px;">
+                            <input type="file" id="activityFiles" hidden multiple accept=".pdf,.doc,.docx,.jpg,.png">
+                            <p>📎 Click to attach files (PDF, Word, Images)</p>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Assign to Section *</label>
+                            <select id="activitySection" required>
+                                <option>Grade 10 - Section A</option>
+                                <option>Grade 10 - Section B</option>
+                                <option>All Sections</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Allow Late Submission</label>
+                            <select id="allowLate">
+                                <option value="yes">Yes, with penalty</option>
+                                <option value="no">No, strict deadline</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">
+                        ✅ Create Activity
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade/Feedback Modal -->
+    <div id="gradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">✓ Grade & Feedback</h2>
+                <button class="close-btn" onclick="closeGradeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="submissionDetails" style="margin-bottom: 25px; padding: 20px; background: #f8fafc; border-radius: 12px;">
+                    <!-- Populated by JS -->
+                </div>
+
+                <form onsubmit="submitGradeAndFeedback(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Score *</label>
+                            <input type="number" id="gradeScore" required min="0" max="100" style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+                        </div>
+                        <div class="form-group">
+                            <label>Total Points</label>
+                            <input type="text" id="gradeTotalPoints" readonly style="background: #f1f5f9;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teacher Feedback *</label>
+                        <textarea id="teacherFeedback" rows="5" required placeholder="Provide constructive feedback on the student's work..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Remarks</label>
+                        <select id="gradeRemark">
+                            <option value="excellent">Excellent Work</option>
+                            <option value="good">Good Job</option>
+                            <option value="satisfactory">Satisfactory</option>
+                            <option value="needs">Needs Improvement</option>
+                            <option value="incomplete">Incomplete</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 16px; font-size: 1.1rem;">
+                        🎯 Submit Grade & Feedback
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Submission Modal -->
+    <div id="viewSubmissionModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 class="modal-title">📄 View Submission</h2>
+                <button class="close-btn" onclick="closeViewSubmissionModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="viewSubmissionContent">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentRole = 'teacher';
+        let loginAttempts = 0;
+        let lockoutTimer = null;
+        let currentUser = null;
+        let currentEditingActivityId = null;
+        let currentGradingSubmission = null;
+        
+        // Sample Data
+        let students = [
+            {
+                id: 'S001',
+                firstName: 'Juan',
+                lastName: 'Dela Cruz',
+                lrn: '123456789012',
+                grade: 'Grade 10',
+                section: 'Section A',
+                strand: 'STEM',
+                sy: '2023-2024',
+                adviser: 'Ms. Maria Santos',
+                contact: '0912 345 6789',
+                email: 'juan@example.com',
+                image: '',
+                scores: {
+                    written: [85, 90, 88, 0, 0, 0, 0, 0, 0, 0],
+                    performance: [88, 92, 0, 0, 0],
+                    quarterly: 90
+                }
+            },
+            {
+                id: 'S002',
+                firstName: 'Maria',
+                lastName: 'Santos',
+                lrn: '123456789013',
+                grade: 'Grade 10',
+                section: 'Section A',
+                strand: 'STEM',
+                sy: '2023-2024',
+                adviser: 'Ms. Maria Santos',
+                contact: '0912 345 6790',
+                email: 'maria@example.com',
+                image: '',
+                scores: {
+                    written: [92, 88, 90, 0, 0, 0, 0, 0, 0, 0],
+                    performance: [90, 88, 0, 0, 0],
+                    quarterly: 0
+                }
+            }
+        ];
+
+        let activities = [
+            {
+                id: 1,
+                title: 'Quiz 1: Algebraic Expressions',
+                type: 'written',
+                subject: 'Mathematics',
+                totalPoints: 50,
+                deadline: '2023-10-25T23:59',
+                description: 'Simplify the following algebraic expressions and solve for x.',
+                section: 'Grade 10 - Section A',
+                status: 'active'
+            },
+            {
+                id: 2,
+                title: 'Project: Real-world Math Application',
+                type: 'performance',
+                subject: 'Mathematics',
+                totalPoints: 100,
+                deadline: '2023-11-01T23:59',
+                description: 'Create a presentation showing real-world applications of linear equations.',
+                section: 'Grade 10 - Section A',
+                status: 'active'
+            }
+        ];
+
+        let submissions = [
+            {
+                id: 1,
+                activityId: 1,
+                studentId: 'S001',
+                studentName: 'Juan Dela Cruz',
+                submittedAt: '2023-10-25T14:30',
+                content: 'Here are my answers to the quiz...',
+                attachments: ['quiz1_answers.pdf'],
+                status: 'submitted',
+                score: null,
+                feedback: null
+            },
+            {
+                id: 2,
+                activityId: 1,
+                studentId: 'S002',
+                studentName: 'Maria Santos',
+                submittedAt: '2023-10-25T10:15',
+                content: 'Quiz answers attached.',
+                attachments: ['santos_quiz1.docx'],
+                status: 'graded',
+                score: 45,
+                feedback: 'Great work! Just be careful with question 3.'
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderClassRecord();
+            renderActivities();
+            renderSubmissions();
+            renderStudentActivities();
+            renderStudentTable();
+            startRealTimeUpdates();
+        });
+
+        // Grading Scale
+        function getGradeRemark(grade) {
+            if (grade >= 90) return { text: 'Outstanding', class: 'grade-outstanding' };
+            if (grade >= 85) return { text: 'Very Satisfactory', class: 'grade-very-satisfactory' };
+            if (grade >= 80) return { text: 'Satisfactory', class: 'grade-satisfactory' };
+            if (grade >= 75) return { text: 'Fairly Satisfactory', class: 'grade-fairly' };
+            return { text: 'Did Not Meet Expectations', class: 'grade-failed' };
+        }
+
+        // Login Functions
+        function selectRole(role, btn) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const idLabel = document.getElementById('idLabel');
+            const userId = document.getElementById('userId');
+            
+            if (role === 'teacher') {
+                idLabel.textContent = 'Teacher ID';
+                userId.placeholder = 'Enter your Teacher ID (e.g., T001)';
+            } else {
+                idLabel.textContent = 'Student ID';
+                userId.placeholder = 'Enter your Student ID (e.g., S001)';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            if (loginAttempts >= 5) {
+                startLockout();
+                return;
+            }
+
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            document.getElementById('loadingScreen').classList.add('active');
+
+            setTimeout(() => {
+                let valid = false;
+                
+                if (currentRole === 'teacher' && userId === 'T001' && password === 'teacher123') {
+                    valid = true;
+                    currentUser = { role: 'teacher', id: 'T001', name: 'Mr. Reyes' };
+                } else if (currentRole === 'student' && userId === 'S001' && password === 'student123') {
+                    valid = true;
+                    currentUser = { role: 'student', id: 'S001', name: 'Juan Dela Cruz' };
+                }
+
+                document.getElementById('loadingScreen').classList.remove('active');
+
+                if (valid) {
+                    loginAttempts = 0;
+                    errorMsg.classList.remove('show');
+                    showDashboard(currentRole);
+                } else {
+                    loginAttempts++;
+                    errorText.textContent = `Invalid credentials! Attempt ${loginAttempts}/5`;
+                    errorMsg.classList.add('show');
+                    
+                    if (loginAttempts >= 5) {
+                        startLockout();
+                    }
+                }
+            }, 1500);
+        }
+
+        function startLockout() {
+            document.getElementById('lockoutScreen').classList.add('active');
+            let timeLeft = 300;
+            
+            lockoutTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('lockoutTimer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(lockoutTimer);
+                    document.getElementById('lockoutScreen').classList.remove('active');
+                    loginAttempts = 0;
+                    document.getElementById('errorMessage').classList.remove('show');
+                }
+            }, 1000);
+        }
+
+        function showDashboard(role) {
+            document.getElementById('loginPage').style.display = 'none';
+            if (role === 'teacher') {
+                document.getElementById('teacherDashboard').style.display = 'block';
+                renderStudentTable();
+            } else {
+                document.getElementById('studentDashboard').style.display = 'block';
+                renderStudentGrades();
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('teacherDashboard').style.display = 'none';
+            document.getElementById('studentDashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').classList.remove('show');
+            currentUser = null;
+        }
+
+        // Navigation Functions
+        function showSection(sectionId, element) {
+            document.querySelectorAll('#teacherDashboard .section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('#teacherDashboard .nav-link').forEach(link => link.classList.remove('active'));
+            if (element) element.classList.add('active');
+        }
+
+        function showStudentSection(sectionId, element) {
+            document.querySelectorAll('#studentDashboard .section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('#studentDashboard .nav-link').forEach(link => link.classList.remove('active'));
+            if (element) element.classList.add('active');
+        }
+
+        // Class Record Functions
+        function renderClassRecord() {
+            // Written Works
+            const writtenBody = document.getElementById('writtenWorksBody');
+            writtenBody.innerHTML = students.map(s => {
+                const total = s.scores.written.reduce((a, b) => a + b, 0);
+                const count = s.scores.written.filter(x => x > 0).length || 1;
+                const average = count > 0 ? (total / count).toFixed(1) : 0;
+                const weighted = (average * 0.4).toFixed(2);
+                
+                return `
+                    <tr>
+                        <td class="student-name-col">${s.lastName}, ${s.firstName}</td>
+                        ${s.scores.written.map((score, i) => `
+                            <td><input type="number" class="score-input" value="${score || ''}" placeholder="-"
+                                onchange="updateScore('${s.id}', 'written', ${i}, this.value)"></td>
+                        `).join('')}
+                        <td class="total-col">${average}</td>
+                        <td class="total-col">${weighted}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Performance Tasks
+            const perfBody = document.getElementById('performanceTasksBody');
+            perfBody.innerHTML = students.map(s => {
+                const total = s.scores.performance.reduce((a, b) => a + b, 0);
+                const count = s.scores.performance.filter(x => x > 0).length || 1;
+                const average = count > 0 ? (total / count).toFixed(1) : 0;
+                const weighted = (average * 0.4).toFixed(2);
+                
+                return `
+                    <tr>
+                        <td class="student-name-col">${s.lastName}, ${s.firstName}</td>
+                        ${s.scores.performance.map((score, i) => `
+                            <td><input type="number" class="score-input" value="${score || ''}" placeholder="-"
+                                onchange="updateScore('${s.id}', 'performance', ${i}, this.value)"></td>
+                        `).join('')}
+                        <td class="total-col">${average}</td>
+                        <td class="total-col">${weighted}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // Quarterly
+            const quarterlyBody = document.getElementById('quarterlyBody');
+            quarterlyBody.innerHTML = students.map(s => {
+                const wwAvg = s.scores.written.reduce((a, b) => a + b, 0) / (s.scores.written.filter(x => x > 0).length || 1);
+                const ptAvg = s.scores.performance.reduce((a, b) => a + b, 0) / (s.scores.performance.filter(x => x > 0).length || 1);
+                const qa = s.scores.quarterly || 0;
+                const initial = (wwAvg * 0.4) + (ptAvg * 0.4) + (qa * 0.2);
+                const final = Math.round(initial);
+                const remark = getGradeRemark(final);
+                
+                return `
+                    <tr>
+                        <td class="student-name-col">${s.lastName}, ${s.firstName}</td>
+                        <td><input type="number" class="score-input" value="${qa || ''}" placeholder="-"
+                            onchange="updateQuarterlyScore('${s.id}', this.value)"></td>
+                        <td class="total-col">${(qa * 0.2).toFixed(2)}</td>
+                        <td class="total-col">${initial.toFixed(2)}</td>
+                        <td class="total-col" style="font-size: 1.2rem;">${final || '-'}</td>
+                        <td><span class="grade-badge ${remark.class}">${final ? remark.text : '-'}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function switchComponent(type, tabElement) {
+            document.querySelectorAll('.component-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.component-table').forEach(t => t.classList.add('hidden'));
+            
+            if (tabElement) tabElement.classList.add('active');
+            
+            if (type === 'written') {
+                document.getElementById('writtenWorksTable').classList.remove('hidden');
+            } else if (type === 'performance') {
+                document.getElementById('performanceTasksTable').classList.remove('hidden');
+            } else {
+                document.getElementById('quarterlyTable').classList.remove('hidden');
+            }
+        }
+
+        function updateScore(studentId, component, index, value) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                student.scores[component][index] = parseFloat(value) || 0;
+                renderClassRecord();
+            }
+        }
+
+        function updateQuarterlyScore(studentId, value) {
+            const student = students.find(s => s.id === studentId);
+            if (student) {
+                student.scores.quarterly = parseFloat(value) || 0;
+                renderClassRecord();
+            }
+        }
+
+        // Activity Functions
+        function renderActivities() {
+            const container = document.getElementById('activitiesList');
+            container.innerHTML = activities.map(act => `
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div>
+                            <div class="activity-title">${act.title}</div>
+                            <div class="activity-meta">
+                                <span class="activity-badge badge-${act.type}">${act.type.toUpperCase()}</span>
+                                <span>📚 ${act.subject}</span>
+                                <span>👥 ${act.section}</span>
+                                <span>📊 ${act.totalPoints} points</span>
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="icon-btn edit" onclick="editActivity(${act.id})">✏️</button>
+                            <button class="icon-btn delete" onclick="deleteActivity(${act.id})">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="activity-description">${act.description}</div>
+                    <div class="activity-meta" style="margin-top: 15px;">
+                        <span class="deadline-warning">⏰ Due: ${new Date(act.deadline).toLocaleString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openActivityModal() {
+            currentEditingActivityId = null;
+            document.querySelector('#activityModal .modal-title').textContent = '📝 Create New Activity';
+            document.getElementById('activityModal').classList.add('active');
+        }
+
+        function closeActivityModal() {
+            document.getElementById('activityModal').classList.remove('active');
+            currentEditingActivityId = null;
+        }
+
+        function editActivity(id) {
+            const activity = activities.find(a => a.id === id);
+            if (activity) {
+                currentEditingActivityId = id;
+                document.getElementById('activityTitle').value = activity.title;
+                document.getElementById('activityType').value = activity.type;
+                document.getElementById('activitySubject').value = activity.subject;
+                document.getElementById('activityPoints').value = activity.totalPoints;
+                document.getElementById('activityDescription').value = activity.description;
+                document.getElementById('activitySection').value = activity.section;
+                
+                const deadline = new Date(activity.deadline);
+                document.getElementById('activityDeadlineDate').value = deadline.toISOString().split('T')[0];
+                document.getElementById('activityDeadlineTime').value = deadline.toTimeString().slice(0, 5);
+                
+                document.querySelector('#activityModal .modal-title').textContent = '✏️ Edit Activity';
+                document.getElementById('activityModal').classList.add('active');
+            }
+        }
+
+        function deleteActivity(id) {
+            if (confirm('Are you sure you want to delete this activity?')) {
+                activities = activities.filter(a => a.id !== id);
+                renderActivities();
+                alert('Activity deleted successfully! ✅');
+            }
+        }
+
+        function createActivity(e) {
+            e.preventDefault();
+            
+            const activityData = {
+                title: document.getElementById('activityTitle').value,
+                type: document.getElementById('activityType').value,
+                subject: document.getElementById('activitySubject').value,
+                totalPoints: parseInt(document.getElementById('activityPoints').value),
+                deadline: `${document.getElementById('activityDeadlineDate').value}T${document.getElementById('activityDeadlineTime').value}`,
+                description: document.getElementById('activityDescription').value,
+                section: document.getElementById('activitySection').value,
+                status: 'active'
+            };
+            
+            if (currentEditingActivityId) {
+                const index = activities.findIndex(a => a.id === currentEditingActivityId);
+                if (index !== -1) {
+                    activities[index] = { ...activities[index], ...activityData };
+                    alert('Activity updated successfully! ✅');
+                }
+            } else {
+                activityData.id = activities.length + 1;
+                activities.push(activityData);
+                alert('Activity created successfully! ✅');
+            }
+            
+            renderActivities();
+            closeActivityModal();
+            e.target.reset();
+        }
+
+        function filterActivities(type, tabElement) {
+            document.querySelectorAll('#activities .tab').forEach(t => t.classList.remove('active'));
+            if (tabElement) tabElement.classList.add('active');
+            
+            const container = document.getElementById('activitiesList');
+            const filtered = type === 'all' ? activities : activities.filter(a => a.type === type);
+            
+            container.innerHTML = filtered.map(act => `
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div>
+                            <div class="activity-title">${act.title}</div>
+                            <div class="activity-meta">
+                                <span class="activity-badge badge-${act.type}">${act.type.toUpperCase()}</span>
+                                <span>📚 ${act.subject}</span>
+                                <span>👥 ${act.section}</span>
+                            </div>
+                        </div>
+                        <div class="action-btns">
+                            <button class="icon-btn edit" onclick="editActivity(${act.id})">✏️</button>
+                            <button class="icon-btn delete" onclick="deleteActivity(${act.id})">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="activity-description">${act.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // Submission Functions
+        function renderSubmissions() {
+            const container = document.getElementById('submissionsList');
+            container.innerHTML = submissions.map(sub => {
+                const activity = activities.find(a => a.id === sub.activityId);
+                const statusClass = sub.status === 'graded' ? 'status-graded' : 
+                                  sub.status === 'late' ? 'status-late' : 'status-submitted';
+                
+                return `
+                    <div class="activity-card ${sub.status}">
+                        <div class="activity-header">
+                            <div>
+                                <div class="activity-title">${activity?.title || 'Unknown Activity'}</div>
+                                <div class="activity-meta">
+                                    <span>👤 ${sub.studentName}</span>
+                                    <span>📅 ${new Date(sub.submittedAt).toLocaleString()}</span>
+                                    <span class="status-badge ${statusClass}">${sub.status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <div class="action-btns">
+                                <button class="icon-btn view" onclick="viewSubmission(${sub.id})">👁️</button>
+                                ${sub.status !== 'graded' ? `<button class="icon-btn edit" onclick="gradeSubmission(${sub.id})">✓</button>` : ''}
+                            </div>
+                        </div>
+                        <div class="activity-description">${sub.content.substring(0, 100)}...</div>
+                        ${sub.score ? `
+                            <div class="grade-display">
+                                <div class="grade-score">${sub.score}/${activity?.totalPoints || 100}</div>
+                                <div class="grade-details">
+                                    <div style="font-weight: 700; color: var(--dark);">Graded</div>
+                                    <div style="color: #64748b; font-size: 0.9rem;">${sub.feedback || 'No feedback'}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterSubmissions(status) {
+            const container = document.getElementById('submissionsList');
+            const filtered = status === 'all' ? submissions : submissions.filter(s => s.status === status);
+            
+            container.innerHTML = filtered.map(sub => {
+                const activity = activities.find(a => a.id === sub.activityId);
+                return `
+                    <div class="activity-card ${sub.status}">
+                        <div class="activity-header">
+                            <div>
+                                <div class="activity-title">${activity?.title || 'Unknown Activity'}</div>
+                                <div class="activity-meta">
+                                    <span>👤 ${sub.studentName}</span>
+                                    <span class="status-badge status-${sub.status}">${sub.status.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <div class="action-btns">
+                                <button class="icon-btn view" onclick="viewSubmission(${sub.id})">👁️</button>
+                                ${sub.status !== 'graded' ? `<button class="icon-btn edit" onclick="gradeSubmission(${sub.id})">✓</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewSubmission(id) {
+            const sub = submissions.find(s => s.id === id);
+            const activity = activities.find(a => a.id === sub.activityId);
+            
+            document.getElementById('viewSubmissionContent').innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">${activity?.title}</h3>
+                    <p style="color: #64748b;">Submitted by: <strong>${sub.studentName}</strong> on ${new Date(sub.submittedAt).toLocaleString()}</p>
+                </div>
+                <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+                    <h4 style="margin-bottom: 10px;">Submission Content:</h4>
+                    <p style="line-height: 1.6;">${sub.content}</p>
+                </div>
+                ${sub.attachments.length ? `
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">Attachments:</h4>
+                        <div class="activity-files">
+                            ${sub.attachments.map(att => `<div class="file-attachment">📎 ${att}</div>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                ${sub.feedback ? `
+                    <div class="feedback-box">
+                        <div class="feedback-header">🎯 Teacher Feedback</div>
+                        <div class="feedback-text">${sub.feedback}</div>
+                        ${sub.score ? `<div style="margin-top: 10px; font-weight: 700;">Score: ${sub.score}/${activity?.totalPoints}</div>` : ''}
+                    </div>
+                ` : ''}
+            `;
+            
+            document.getElementById('viewSubmissionModal').classList.add('active');
+        }
+
+        function closeViewSubmissionModal() {
+            document.getElementById('viewSubmissionModal').classList.remove('active');
+        }
+
+        function gradeSubmission(id) {
+            currentGradingSubmission = submissions.find(s => s.id === id);
+            const activity = activities.find(a => a.id === currentGradingSubmission.activityId);
+            
+            document.getElementById('submissionDetails').innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 700; color: var(--dark);">${currentGradingSubmission.studentName}</div>
+                        <div style="color: #64748b; font-size: 0.9rem;">${activity?.title}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.85rem; color: #64748b;">Total Points</div>
+                        <div style="font-weight: 700; color: var(--dark);">${activity?.totalPoints}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('gradeTotalPoints').value = activity?.totalPoints;
+            document.getElementById('gradeScore').value = '';
+            document.getElementById('teacherFeedback').value = '';
+            
+            document.getElementById('gradeModal').classList.add('active');
+        }
+
+        function closeGradeModal() {
+            document.getElementById('gradeModal').classList.remove('active');
+            currentGradingSubmission = null;
+        }
+
+        function submitGradeAndFeedback(e) {
+            e.preventDefault();
+            
+            if (currentGradingSubmission) {
+                currentGradingSubmission.score = parseInt(document.getElementById('gradeScore').value);
+                currentGradingSubmission.feedback = document.getElementById('teacherFeedback').value;
+                currentGradingSubmission.status = 'graded';
+                
+                renderSubmissions();
+                closeGradeModal();
+                alert('Grade and feedback submitted! ✅');
+            }
+        }
+
+        // Student Activities
+        function renderStudentActivities() {
+            const container = document.getElementById('studentActivitiesList');
+            
+            container.innerHTML = activities.map(act => {
+                const submission = submissions.find(s => s.activityId === act.id && s.studentId === 'S001');
+                const isSubmitted = !!submission;
+                const isGraded = submission?.status === 'graded';
+                const isLate = new Date() > new Date(act.deadline);
+                
+                let cardClass = '';
+                if (isGraded) cardClass = 'graded';
+                else if (isSubmitted) cardClass = 'submitted';
+                else if (isLate) cardClass = 'late';
+                
+                return `
+                    <div class="activity-card ${cardClass}">
+                        <div class="activity-header">
+                            <div>
+                                <div class="activity-title">${act.title}</div>
+                                <div class="activity-meta">
+                                    <span class="activity-badge badge-${act.type}">${act.type.toUpperCase()}</span>
+                                    <span>📚 ${act.subject}</span>
+                                    <span>📊 ${act.totalPoints} points</span>
+                                </div>
+                            </div>
+                            ${isGraded ? `<span class="grade-badge grade-outstanding">${submission.score}/${act.totalPoints}</span>` : ''}
+                        </div>
+                        
+                        <div class="activity-description">${act.description}</div>
+                        
+                        ${isSubmitted ? `
+                            <div style="margin-top: 15px; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid var(--success);">
+                                <div style="font-weight: 600; color: var(--success); margin-bottom: 5px;">✓ Submitted</div>
+                                <div style="font-size: 0.9rem; color: #64748b;">Submitted on: ${new Date(submission.submittedAt).toLocaleString()}</div>
+                            </div>
+                        ` : `
+                            <div class="activity-meta" style="margin-top: 15px;">
+                                <span class="${isLate ? 'deadline-warning' : ''}">
+                                    ${isLate ? '⏰ OVERDUE' : '⏰ Due'}: ${new Date(act.deadline).toLocaleString()}
+                                </span>
+                            </div>
+                        `}
+                        
+                        ${isGraded && submission.feedback ? `
+                            <div class="feedback-box">
+                                <div class="feedback-header">🎯 Teacher Feedback</div>
+                                <div class="feedback-text">${submission.feedback}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${!isSubmitted && !isGraded ? `
+                            <div class="submission-area">
+                                <textarea class="submission-input" id="submitContent_${act.id}" placeholder="Type your answer here or describe your submission..."></textarea>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <button class="btn btn-primary" onclick="submitActivity(${act.id})">📤 Submit Activity</button>
+                                    <span style="color: #64748b; font-size: 0.9rem;">or</span>
+                                    <button class="btn btn-secondary" onclick="document.getElementById('file_${act.id}').click()">📎 Attach File</button>
+                                    <input type="file" id="file_${act.id}" hidden>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function submitActivity(activityId) {
+            const content = document.getElementById(`submitContent_${activityId}`).value;
+            if (!content.trim()) {
+                alert('Please enter your submission content!');
+                return;
+            }
+            
+            const newSubmission = {
+                id: submissions.length + 1,
+                activityId: activityId,
+                studentId: 'S001',
+                studentName: 'Juan Dela Cruz',
+                submittedAt: new Date().toISOString(),
+                content: content,
+                attachments: [],
+                status: 'submitted',
+                score: null,
+                feedback: null
+            };
+            
+            submissions.push(newSubmission);
+            renderStudentActivities();
+            alert('Activity submitted successfully! ✅');
+        }
+
+        function filterStudentActivities(filter, tabElement) {
+            document.querySelectorAll('#studentActivities .tab').forEach(t => t.classList.remove('active'));
+            if (tabElement) tabElement.classList.add('active');
+            
+            renderStudentActivities();
+        }
+
+        // Real-time Updates Simulation
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    updateActivityFeed();
+                }
+            }, 10000);
+        }
+
+        function updateActivityFeed() {
+            const feed = document.getElementById('teacherActivityFeed');
+            const messages = [
+                'Maria Santos submitted Quiz 1',
+                'New student logged in',
+                'Assignment deadline approaching',
+                'Grade updated for Juan Dela Cruz'
+            ];
+            
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            const time = new Date().toLocaleTimeString();
+            
+            const div = document.createElement('div');
+            div.style.cssText = 'padding: 15px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.5s;';
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">🔔</span>
+                    <span>${msg}</span>
+                </div>
+                <span style="color: #64748b; font-size: 0.85rem;">${time}</span>
+            `;
+            
+            feed.insertBefore(div, feed.firstChild);
+        }
+
+        // Image Upload Functions
+        function updateProfilePic(input, target) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (target === 'teacher') {
+                        document.getElementById('teacherAvatar').src = e.target.result;
+                    } else if (target === 'teacherProfile') {
+                        document.getElementById('teacherProfilePic').src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewStudentPic(input) {
+            const preview = document.getElementById('studentPreview');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            const uploadArea = document.getElementById('studentUploadArea');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    uploadArea.classList.add('has-image');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function updateAccountPic(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('accountPreview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    document.getElementById('accountUploadPlaceholder').classList.add('hidden');
+                    document.querySelector('#studentAccount .image-upload-area').classList.add('has-image');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Student Management
+        function addNewStudent(e) {
+            e.preventDefault();
+            
+            const newStudent = {
+                id: document.getElementById('newStudentID').value,
+                firstName: document.getElementById('newStudentFirstName').value,
+                lastName: document.getElementById('newStudentLastName').value,
+                lrn: document.getElementById('newStudentLRN').value,
+                grade: document.getElementById('newStudentGrade').value,
+                section: document.getElementById('newStudentSection').value,
+                strand: document.getElementById('newStudentStrand').value,
+                sy: document.getElementById('newStudentSY').value,
+                adviser: 'Mr. Reyes',
+                contact: document.getElementById('newStudentContact').value,
+                email: document.getElementById('newStudentEmail').value,
+                image: document.getElementById('studentPreview').src || '',
+                scores: {
+                    written: [0,0,0,0,0,0,0,0,0,0],
+                    performance: [0,0,0,0,0],
+                    quarterly: 0
+                }
+            };
+            
+            students.push(newStudent);
+            alert('Student added successfully! ✅');
+            e.target.reset();
+            document.getElementById('studentPreview').classList.add('hidden');
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('studentUploadArea').classList.remove('has-image');
+            
+            renderStudentTable();
+            renderClassRecord();
+        }
+
+        function renderStudentTable() {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>
+                        <div class="student-info">
+                            <img src="${student.image}" class="student-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+                            <div>
+                                <div style="font-weight: 700;">${student.firstName} ${student.lastName}</div>
+                                <small style="color: #64748b;">${student.id}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${student.lrn}</td>
+                    <td>${student.grade} - ${student.section}</td>
+                    <td><span class="grade-badge grade-very-satisfactory">${student.strand}</span></td>
+                    <td>${student.contact || 'N/A'}</td>
+                    <td class="action-btns">
+                        <button class="icon-btn view" onclick="viewStudent('${student.id}')">👁️</button>
+                        <button class="icon-btn edit">✏️</button>
+                        <button class="icon-btn delete" onclick="deleteStudent('${student.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteStudent(id) {
+            if (confirm('Are you sure you want to remove this student?')) {
+                students = students.filter(s => s.id !== id);
+                renderStudentTable();
+                renderClassRecord();
+            }
+        }
+
+        function viewStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                alert(`Student Details:\n\nName: ${student.firstName} ${student.lastName}\nLRN: ${student.lrn}\nGrade: ${student.grade}\nSection: ${student.section}\nStrand: ${student.strand}\nAdviser: ${student.adviser}`);
+            }
+        }
+
+        function searchStudents(query) {
+            const rows = document.querySelectorAll('#studentTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        function renderStudentGrades() {
+            const container = document.getElementById('studentGradesContainer');
+            const student = students.find(s => s.id === 'S001');
+            
+            if (!student) return;
+            
+            const wwAvg = student.scores.written.reduce((a,b) => a+b, 0) / student.scores.written.filter(x => x > 0).length || 0;
+            const ptAvg = student.scores.performance.reduce((a,b) => a+b, 0) / student.scores.performance.filter(x => x > 0).length || 0;
+            const qa = student.scores.quarterly;
+            const initial = (wwAvg * 0.4) + (ptAvg * 0.4) + (qa * 0.2);
+            
+            container.innerHTML = `
+                <div class="subject-row">
+                    <div class="subject-info">
+                        <h4>Written Works (40%)</h4>
+                        <p>Average of quizzes, assignments, and seatworks</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${wwAvg}%"></div>
+                        </div>
+                    </div>
+                    <div class="subject-grade">
+                        <div class="grade">${wwAvg.toFixed(1)}</div>
+                        <span class="grade-badge ${getGradeRemark(wwAvg).class}">${getGradeRemark(wwAvg).text}</span>
+                    </div>
+                </div>
+
+                <div class="subject-row">
+                    <div class="subject-info">
+                        <h4>Performance Tasks (40%)</h4>
+                        <p>Projects, presentations, and practical exams</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${ptAvg}%"></div>
+                        </div>
+                    </div>
+                    <div class="subject-grade">
+                        <div class="grade">${ptAvg.toFixed(1)}</div>
+                        <span class="grade-badge ${getGradeRemark(ptAvg).class}">${getGradeRemark(ptAvg).text}</span>
+                    </div>
+                </div>
+
+                <div class="subject-row">
+                    <div class="subject-info">
+                        <h4>Quarterly Assessment (20%)</h4>
+                        <p>Periodic examinations and major tests</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${qa}%"></div>
+                        </div>
+                    </div>
+                    <div class="subject-grade">
+                        <div class="grade">${qa || '-'}</div>
+                        <span class="grade-badge ${qa ? getGradeRemark(qa).class : 'grade-satisfactory'}">${qa ? getGradeRemark(qa).text : 'Pending'}</span>
+                    </div>
+                </div>
+
+                <div class="subject-row" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-radius: 12px; padding: 25px; margin-top: 20px;">
+                    <div class="subject-info">
+                        <h4 style="font-size: 1.3rem;">Initial Grade</h4>
+                        <p>Weighted average of all components</p>
+                    </div>
+                    <div class="subject-grade">
+                        <div class="grade" style="font-size: 2.5rem; color: var(--primary);">${initial ? initial.toFixed(2) : '-'}</div>
+                        <span class="grade-badge ${initial ? getGradeRemark(initial).class : 'grade-satisfactory'}" style="font-size: 1rem;">
+                            ${initial ? getGradeRemark(initial).text : 'Pending'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function saveAccountSettings() {
+            alert('Account settings saved successfully! ✅');
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
