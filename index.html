@@ -1,0 +1,2338 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pasay City South High School - Grading Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1e40af;
+            --primary-dark: #1e3a8a;
+            --secondary: #3b82f6;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --light: #f3f4f6;
+            --dark: #1f2937;
+            --white: #ffffff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .loading-screen.active {
+            display: flex;
+        }
+
+        .loader {
+            width: 80px;
+            height: 80px;
+            border: 6px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        /* Lockout Screen */
+        .lockout-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .lockout-screen.active {
+            display: flex;
+        }
+
+        .lockout-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: var(--danger);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .lockout-timer {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--accent);
+            margin: 20px 0;
+            font-family: monospace;
+        }
+
+        /* Login Page Styles */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            background: linear-gradient(rgba(30, 64, 175, 0.8), rgba(30, 58, 138, 0.9)), url('bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            max-width: 1200px;
+            width: 100%;
+            min-height: 650px;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.8s ease;
+        }
+
+        .login-sidebar {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--secondary) 100%);
+            padding: 60px 50px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-sidebar::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 30px 30px;
+            opacity: 0.3;
+            animation: moveGrid 20s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .school-logo-container {
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+            border: 5px solid rgba(255,255,255,0.3);
+        }
+
+        .school-logo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .school-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-align: center;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .school-motto {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            text-align: center;
+            z-index: 1;
+            font-style: italic;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .decoration {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .decoration:nth-child(1) { top: -150px; right: -150px; animation-delay: 0s; }
+        .decoration:nth-child(2) { bottom: -100px; left: -100px; width: 200px; height: 200px; animation-delay: 2s; }
+
+        .login-form-section {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .welcome-text {
+            margin-bottom: 30px;
+        }
+
+        .welcome-text h2 {
+            font-size: 2.2rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-text p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .role-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 35px;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .role-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #6b7280;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .role-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(30deg);
+            transition: all 0.6s;
+        }
+
+        .login-btn:hover::after {
+            left: 100%;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .demo-accounts {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border-left: 5px solid var(--secondary);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: var(--dark);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .demo-accounts strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .demo-account-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            border-left: 4px solid var(--danger);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            background: #f1f5f9;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+            padding: 30px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            padding: 0 25px 30px;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 25px;
+        }
+
+        .profile-image-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+
+        .user-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #e0e7ff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 35px;
+            height: 35px;
+            background: var(--primary);
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: var(--secondary);
+            transform: scale(1.1);
+        }
+
+        .user-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .user-role {
+            color: #6b7280;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 15px;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #64748b;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            font-size: 1.3rem;
+            width: 28px;
+            text-align: center;
+        }
+
+        .main-content {
+            margin-left: 300px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 1.9rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            padding: 12px 25px;
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 28px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            color: #64748b;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--primary); }
+        .stat-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--success); }
+        .stat-icon.orange { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: var(--accent); }
+        .stat-icon.red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: var(--danger); }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            color: var(--success);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-bottom: 25px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 18px;
+            text-align: left;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .data-table tr {
+            transition: all 0.3s;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8fafc;
+            transform: scale(1.01);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .data-table td {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .student-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e0e7ff;
+        }
+
+        .grade-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .grade-outstanding { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; }
+        .grade-very-satisfactory { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
+        .grade-satisfactory { background: linear-gradient(135deg, #fef9c3, #fde047); color: #854d0e; }
+        .grade-fairly { background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #9a3412; }
+        .grade-failed { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .icon-btn.edit {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .icon-btn.delete {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .icon-btn.view {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s ease;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 2px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .close-btn:hover {
+            background: #fee2e2;
+            color: var(--danger);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--secondary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .image-upload-area {
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+            margin-bottom: 25px;
+        }
+
+        .image-upload-area:hover {
+            border-color: var(--secondary);
+            background: #eff6ff;
+        }
+
+        .image-upload-area.has-image {
+            border-style: solid;
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .upload-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 15px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-weight: 600;
+            color: #64748b;
+            background: #f1f5f9;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 15px rgba(30, 64, 175, 0.3);
+        }
+
+        .tab:hover:not(.active) {
+            background: #e2e8f0;
+            color: var(--dark);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 5px;
+            transition: width 0.8s ease;
+            box-shadow: 0 2px 10px rgba(30, 64, 175, 0.3);
+        }
+
+        .subject-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.3s;
+        }
+
+        .subject-row:hover {
+            background: #f8fafc;
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 12px;
+        }
+
+        .subject-info h4 {
+            color: var(--dark);
+            margin-bottom: 6px;
+            font-size: 1.1rem;
+        }
+
+        .subject-info p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .subject-grade {
+            text-align: right;
+        }
+
+        .subject-grade .grade {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .profile-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .profile-image-large {
+            width: 180px;
+            height: 180px;
+            border-radius: 20px;
+            object-fit: cover;
+            border: 4px solid #e0e7ff;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .profile-details h2 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .profile-details .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .section-content {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .grading-scale-legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 968px) {
+            .login-container {
+                grid-template-columns: 1fr;
+            }
+            .login-sidebar {
+                display: none;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .search-box {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            width: 300px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loader"></div>
+        <div class="loading-text">Loading Portal...</div>
+    </div>
+
+    <!-- Lockout Screen -->
+    <div id="lockoutScreen" class="lockout-screen">
+        <div class="lockout-icon">🔒</div>
+        <h2>Too Many Failed Attempts</h2>
+        <p>For security reasons, please wait before trying again.</p>
+        <div class="lockout-timer" id="lockoutTimer">05:00</div>
+        <p>Time remaining</p>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="login-wrapper">
+        <div class="login-container">
+            <div class="login-sidebar">
+                <div class="decoration"></div>
+                <div class="decoration"></div>
+                <div class="school-logo-container">
+                    <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏫</text></svg>'">
+                </div>
+                <div class="school-name">Pasay City South<br>High School</div>
+                <div class="school-motto">"Building Futures, Shaping Leaders"</div>
+            </div>
+            
+            <div class="login-form-section">
+                <div class="welcome-text">
+                    <h2>Welcome Back! 👋</h2>
+                    <p>Please select your role and sign in to continue</p>
+                </div>
+                
+                <div class="role-selector">
+                    <button class="role-btn active" onclick="selectRole('teacher')">
+                        <span>👨‍🏫</span> Teacher
+                    </button>
+                    <button class="role-btn" onclick="selectRole('student')">
+                        <span>👨‍🎓</span> Student
+                    </button>
+                </div>
+
+                <div id="errorMessage" class="error-message">
+                    <span>⚠️</span>
+                    <span id="errorText">Invalid credentials!</span>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label id="idLabel">Teacher ID</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="userId" placeholder="Enter your ID (e.g., T001)" required>
+                            <span class="input-icon">🆔</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="Enter your password" required>
+                            <span class="input-icon">🔒</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn">
+                        Sign In Securely →
+                    </button>
+                </form>
+
+                <div class="divider"><span>Demo Access</span></div>
+
+                <div class="demo-accounts">
+                    <strong>📋 Try these demo accounts:</strong>
+                    <div class="demo-account-item">
+                        <span>👨‍🏫</span>
+                        <div>
+                            <strong>Teacher:</strong> ID: T001 | Pass: teacher123
+                        </div>
+                    </div>
+                    <div class="demo-account-item">
+                        <span>👨‍🎓</span>
+                        <div>
+                            <strong>Student:</strong> ID: S001 | Pass: student123
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard -->
+    <div id="teacherDashboard" class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="profile-image-container">
+                    <img src="" alt="Profile" class="user-avatar" id="teacherAvatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🏫</text></svg>'">
+                    <label class="upload-btn" onclick="document.getElementById('teacherPicInput').click()">📷</label>
+                    <input type="file" id="teacherPicInput" hidden accept="image/*" onchange="updateProfilePic(this, 'teacher')">
+                </div>
+                <div class="user-name" id="teacherName">Mr. Reyes</div>
+                <div class="user-role">Mathematics Faculty</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showSection('teacherOverview')">
+                        <i>📊</i> Overview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('gradeManagement')">
+                        <i>📝</i> Grade Management
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('studentList')">
+                        <i>👨‍🎓</i> My Students
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('addStudent')">
+                        <i>➕</i> Add Student
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showSection('teacherProfile')">
+                        <i>👤</i> My Profile
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Teacher Dashboard</h1>
+                <div class="header-actions">
+                    <span style="color: #64748b; font-weight: 500;">School Year: 2023-2024</span>
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- Teacher Overview -->
+            <div id="teacherOverview" class="section-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Total Students</div>
+                                <div class="stat-value">42</div>
+                                <div class="stat-change">↑ 3 transferees</div>
+                            </div>
+                            <div class="stat-icon blue">👨‍🎓</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Class Average</div>
+                                <div class="stat-value">85.4</div>
+                                <div class="stat-change">↑ 2.1 from Q1</div>
+                            </div>
+                            <div class="stat-icon green">📈</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Pending Grades</div>
+                                <div class="stat-value">12</div>
+                                <div class="stat-change">Due this Friday</div>
+                            </div>
+                            <div class="stat-icon orange">⏰</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Failing Students</div>
+                                <div class="stat-value">3</div>
+                                <div class="stat-change">Needs intervention</div>
+                            </div>
+                            <div class="stat-icon red">⚠️</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Grading Scale Reference</h3>
+                    </div>
+                    <div class="grading-scale-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dcfce7;"></div>
+                            <span>90-100 (Outstanding)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #dbeafe;"></div>
+                            <span>85-89 (Very Satisfactory)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fef9c3;"></div>
+                            <span>80-84 (Satisfactory)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffedd5;"></div>
+                            <span>75-79 (Fairly Satisfactory)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fee2e2;"></div>
+                            <span>Below 75 (Did Not Meet)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📝 Recent Grade Submissions</h3>
+                        <button class="btn btn-primary" onclick="openGradeModal()">+ Add Grade</button>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Subject</th>
+                                <th>Quarter</th>
+                                <th>Grade</th>
+                                <th>Remarks</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradesTableBody">
+                            <tr>
+                                <td>
+                                    <div class="student-info">
+                                        <img src="" class="student-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+                                        <div>
+                                            <div style="font-weight: 700;">Juan Dela Cruz</div>
+                                            <small style="color: #64748b;">Grade 10-A | STEM</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Mathematics</td>
+                                <td>1st Quarter</td>
+                                <td><span class="grade-badge grade-outstanding">92</span></td>
+                                <td>Outstanding</td>
+                                <td class="action-btns">
+                                    <button class="icon-btn edit" onclick="editGrade(this)">✏️</button>
+                                    <button class="icon-btn delete" onclick="deleteGrade(this)">🗑️</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Grade Management -->
+            <div id="gradeManagement" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📊 Grade Entry</h3>
+                        <div class="tabs">
+                            <div class="tab active" onclick="switchTab(this, 'written')">Written Works (40%)</div>
+                            <div class="tab" onclick="switchTab(this, 'performance')">Performance Tasks (40%)</div>
+                            <div class="tab" onclick="switchTab(this, 'quarterly')">Quarterly Assessment (20%)</div>
+                        </div>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Score 1</th>
+                                <th>Score 2</th>
+                                <th>Score 3</th>
+                                <th>Total Score</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Juan Dela Cruz</td>
+                                <td><input type="number" class="score-input" value="85" style="width: 70px; padding: 8px; border-radius: 8px; border: 2px solid #e2e8f0;"></td>
+                                <td><input type="number" class="score-input" value="90" style="width: 70px; padding: 8px; border-radius: 8px; border: 2px solid #e2e8f0;"></td>
+                                <td><input type="number" class="score-input" value="88" style="width: 70px; padding: 8px; border-radius: 8px; border: 2px solid #e2e8f0;"></td>
+                                <td><strong style="color: var(--primary); font-size: 1.2rem;">87.7</strong></td>
+                                <td><button class="btn btn-success" style="padding: 8px 16px;">💾 Save</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Student List -->
+            <div id="studentList" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">👨‍🎓 My Students</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" class="search-box" placeholder="🔍 Search students..." onkeyup="searchStudents(this.value)">
+                            <select class="filter-select">
+                                <option>All Sections</option>
+                                <option>Grade 10-A</option>
+                                <option>Grade 10-B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <table class="data-table" id="studentTable">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>LRN</th>
+                                <th>Grade & Section</th>
+                                <th>Strand</th>
+                                <th>Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Add Student (Transferee) -->
+            <div id="addStudent" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">➕ Add New Student (Transferee)</h3>
+                    </div>
+                    <form onsubmit="addNewStudent(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" id="newStudentFirstName" required placeholder="Enter first name">
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" id="newStudentLastName" required placeholder="Enter last name">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>LRN (Learner Reference Number) *</label>
+                                <input type="text" id="newStudentLRN" required placeholder="e.g., 123456789012" maxlength="12">
+                            </div>
+                            <div class="form-group">
+                                <label>Student ID *</label>
+                                <input type="text" id="newStudentID" required placeholder="e.g., S002">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Grade Level *</label>
+                                <select id="newStudentGrade" required>
+                                    <option value="">Select Grade</option>
+                                    <option>Grade 7</option>
+                                    <option>Grade 8</option>
+                                    <option>Grade 9</option>
+                                    <option>Grade 10</option>
+                                    <option>Grade 11</option>
+                                    <option>Grade 12</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Section *</label>
+                                <input type="text" id="newStudentSection" required placeholder="e.g., Section A">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Strand *</label>
+                                <select id="newStudentStrand" required>
+                                    <option value="">Select Strand</option>
+                                    <option>STEM</option>
+                                    <option>ABM</option>
+                                    <option>HUMSS</option>
+                                    <option>GAS</option>
+                                    <option>TVL</option>
+                                    <option>Arts & Design</option>
+                                    <option>Sports</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>School Year *</label>
+                                <input type="text" id="newStudentSY" required placeholder="e.g., 2023-2024" value="2023-2024">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Contact Number</label>
+                                <input type="tel" id="newStudentContact" placeholder="09XX XXX XXXX">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="newStudentEmail" placeholder="student@email.com">
+                            </div>
+                        </div>
+
+                        <div class="image-upload-area" onclick="document.getElementById('newStudentPic').click()" id="studentUploadArea">
+                            <input type="file" id="newStudentPic" hidden accept="image/*" onchange="previewStudentPic(this)">
+                            <div id="uploadPlaceholder">
+                                <div style="font-size: 3rem; margin-bottom: 10px;">📷</div>
+                                <p style="font-weight: 600; color: var(--dark); margin-bottom: 5px;">Click to upload student photo</p>
+                                <p style="font-size: 0.9rem; color: #64748b;">Recommended: 1x1 or 2x2 picture</p>
+                            </div>
+                            <img id="studentPreview" class="upload-preview hidden">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">
+                            ✅ Register Student
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Teacher Profile -->
+            <div id="teacherProfile" class="section-content hidden">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div style="position: relative;">
+                            <img src="" alt="Profile" class="profile-image-large" id="teacherProfilePic" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🏫</text></svg>'">
+                            <label class="upload-btn" onclick="document.getElementById('teacherProfilePicInput').click()" style="position: absolute; bottom: 10px; right: 10px; width: 45px; height: 45px; font-size: 1.2rem;">📷</label>
+                            <input type="file" id="teacherProfilePicInput" hidden accept="image/*" onchange="updateProfilePic(this, 'teacherProfile')">
+                        </div>
+                        <div class="profile-details">
+                            <h2 id="profileTeacherName">Mr. Juan Reyes</h2>
+                            <p class="subtitle" id="profileTeacherRank">Master Teacher I</p>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">Faculty Department</div>
+                                    <div class="info-value" id="profileFaculty">Mathematics Department</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Teacher Mastery</div>
+                                    <div class="info-value" id="profileMastery">Master Teacher I</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Sections Handled</div>
+                                    <div class="info-value" id="profileSections">Grade 10-A, 10-B</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Strand</div>
+                                    <div class="info-value" id="profileStrand">STEM / ABM</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">School Year</div>
+                                    <div class="info-value">2023-2024</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Contact</div>
+                                    <div class="info-value">0912 345 6789</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="studentDashboard" class="dashboard">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="profile-image-container">
+                    <img src="" alt="Profile" class="user-avatar" id="studentAvatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🎓</text></svg>'">
+                </div>
+                <div class="user-name" id="studentSidebarName">Juan Dela Cruz</div>
+                <div class="user-role" id="studentSidebarInfo">Grade 10 - STEM</div>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showStudentSection('studentOverview')">
+                        <i>📊</i> My Grades
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentSchedule')">
+                        <i>📅</i> Schedule
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentSubjects')">
+                        <i>📚</i> Subjects
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showStudentSection('studentProfile')">
+                        <i>👤</i> My Profile
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1 class="page-title">Student Portal</h1>
+                <div class="header-actions">
+                    <span style="color: #64748b; font-weight: 500;">SY: 2023-2024</span>
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </div>
+            </div>
+
+            <!-- Student Overview -->
+            <div id="studentOverview" class="section-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">General Average</div>
+                                <div class="stat-value" id="studentGenAvg">88.5</div>
+                                <div class="stat-change">With Honors 🏆</div>
+                            </div>
+                            <div class="stat-icon green">🎖️</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Subjects</div>
+                                <div class="stat-value">8</div>
+                                <div class="stat-change">2nd Semester</div>
+                            </div>
+                            <div class="stat-icon blue">📚</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Attendance</div>
+                                <div class="stat-value">96%</div>
+                                <div class="stat-change">Excellent</div>
+                            </div>
+                            <div class="stat-icon orange">📅</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div>
+                                <div class="stat-title">Conduct</div>
+                                <div class="stat-value">95</div>
+                                <div class="stat-change">Very Good</div>
+                            </div>
+                            <div class="stat-icon blue">⭐</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📋 Current Grades - 1st Quarter</h3>
+                        <select style="padding: 10px 15px; border-radius: 10px; border: 2px solid #e2e8f0; font-weight: 600;">
+                            <option>1st Quarter</option>
+                            <option>2nd Quarter</option>
+                        </select>
+                    </div>
+                    
+                    <div id="studentGradesContainer">
+                        <!-- Grades populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Schedule -->
+            <div id="studentSchedule" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📅 Class Schedule</h3>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📅</div>
+                        <h3>Schedule View</h3>
+                        <p>Your weekly class schedule will be displayed here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Subjects -->
+            <div id="studentSubjects" class="section-content hidden">
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">📚 Subject Details</h3>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📖</div>
+                        <h3>Subject Information</h3>
+                        <p>Detailed subject information and materials will be shown here.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Profile -->
+            <div id="studentProfile" class="section-content hidden">
+                <div class="profile-section">
+                    <div class="profile-header">
+                        <div style="position: relative;">
+                            <img src="" alt="Profile" class="profile-image-large" id="studentProfilePic" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🎓</text></svg>'">
+                        </div>
+                        <div class="profile-details">
+                            <h2 id="profileStudentName">Juan Dela Cruz</h2>
+                            <p class="subtitle" id="profileStudentSection">Grade 10 - Section A | STEM</p>
+                            
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label">LRN (Learner Reference Number)</div>
+                                    <div class="info-value" id="profileLRN">123456789012</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Student ID</div>
+                                    <div class="info-value" id="profileStudentID">S001</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Grade & Section</div>
+                                    <div class="info-value" id="profileGradeSection">Grade 10 - Section A</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Strand</div>
+                                    <div class="info-value" id="profileStrand">STEM</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">School Year</div>
+                                    <div class="info-value">2023-2024</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label">Adviser</div>
+                                    <div class="info-value" id="profileAdviser">Ms. Maria Santos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Grade Modal -->
+    <div id="gradeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 Add New Grade</h2>
+                <button class="close-btn" onclick="closeGradeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="submitGrade(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Student *</label>
+                            <select id="gradeStudent" required>
+                                <option value="">Select Student</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Subject *</label>
+                            <select id="gradeSubject" required>
+                                <option>Mathematics</option>
+                                <option>Science</option>
+                                <option>English</option>
+                                <option>Filipino</option>
+                                <option>Araling Panlipunan</option>
+                                <option>ESP</option>
+                                <option>TLE</option>
+                                <option>MAPEH</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quarter *</label>
+                            <select id="gradeQuarter" required>
+                                <option>1st Quarter</option>
+                                <option>2nd Quarter</option>
+                                <option>3rd Quarter</option>
+                                <option>4th Quarter</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Grade *</label>
+                            <input type="number" id="gradeValue" min="60" max="100" placeholder="85" required style="font-size: 1.5rem; font-weight: bold; text-align: center;">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <label>Remarks</label>
+                        <textarea id="gradeRemarks" rows="3" placeholder="Additional comments about the student's performance..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">
+                        💾 Save Grade
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let currentRole = 'teacher';
+        let loginAttempts = 0;
+        let lockoutTimer = null;
+        let students = [
+            {
+                id: 'S001',
+                firstName: 'Juan',
+                lastName: 'Dela Cruz',
+                lrn: '123456789012',
+                grade: 'Grade 10',
+                section: 'Section A',
+                strand: 'STEM',
+                sy: '2023-2024',
+                adviser: 'Ms. Maria Santos',
+                contact: '0912 345 6789',
+                email: 'juan@example.com',
+                image: ''
+            }
+        ];
+
+        // Grading Scale
+        function getGradeRemark(grade) {
+            if (grade >= 90) return { text: 'Outstanding', class: 'grade-outstanding' };
+            if (grade >= 85) return { text: 'Very Satisfactory', class: 'grade-very-satisfactory' };
+            if (grade >= 80) return { text: 'Satisfactory', class: 'grade-satisfactory' };
+            if (grade >= 75) return { text: 'Fairly Satisfactory', class: 'grade-fairly' };
+            return { text: 'Did Not Meet Expectations', class: 'grade-failed' };
+        }
+
+        // Login Functions
+        function selectRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const idLabel = document.getElementById('idLabel');
+            const userId = document.getElementById('userId');
+            
+            if (role === 'teacher') {
+                idLabel.textContent = 'Teacher ID';
+                userId.placeholder = 'Enter your Teacher ID (e.g., T001)';
+            } else {
+                idLabel.textContent = 'Student ID';
+                userId.placeholder = 'Enter your Student ID (e.g., S001)';
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            if (loginAttempts >= 5) {
+                startLockout();
+                return;
+            }
+
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            // Show loading
+            document.getElementById('loadingScreen').classList.add('active');
+
+            setTimeout(() => {
+                let valid = false;
+                
+                if (currentRole === 'teacher' && userId === 'T001' && password === 'teacher123') {
+                    valid = true;
+                } else if (currentRole === 'student' && userId === 'S001' && password === 'student123') {
+                    valid = true;
+                }
+
+                document.getElementById('loadingScreen').classList.remove('active');
+
+                if (valid) {
+                    loginAttempts = 0;
+                    errorMsg.classList.remove('show');
+                    showDashboard(currentRole);
+                } else {
+                    loginAttempts++;
+                    errorText.textContent = `Invalid credentials! Attempt ${loginAttempts}/5`;
+                    errorMsg.classList.add('show');
+                    
+                    if (loginAttempts >= 5) {
+                        startLockout();
+                    }
+                }
+            }, 1500);
+        }
+
+        function startLockout() {
+            document.getElementById('lockoutScreen').classList.add('active');
+            let timeLeft = 300; // 5 minutes
+            
+            lockoutTimer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('lockoutTimer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(lockoutTimer);
+                    document.getElementById('lockoutScreen').classList.remove('active');
+                    loginAttempts = 0;
+                    document.getElementById('errorMessage').classList.remove('show');
+                }
+            }, 1000);
+        }
+
+        function showDashboard(role) {
+            document.getElementById('loginPage').style.display = 'none';
+            if (role === 'teacher') {
+                document.getElementById('teacherDashboard').style.display = 'block';
+                populateStudentSelect();
+                renderStudentTable();
+            } else {
+                document.getElementById('studentDashboard').style.display = 'block';
+                renderStudentGrades();
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('teacherDashboard').style.display = 'none';
+            document.getElementById('studentDashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('errorMessage').classList.remove('show');
+            
+            // Reset nav active states
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelectorAll('.nav-link')[0].classList.add('active');
+        }
+
+        // Navigation Functions
+        function showSection(sectionId) {
+            document.querySelectorAll('#teacherDashboard .section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('#teacherDashboard .nav-link').forEach(link => link.classList.remove('active'));
+            event.target.closest('.nav-link').classList.add('active');
+        }
+
+        function showStudentSection(sectionId) {
+            document.querySelectorAll('#studentDashboard .section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('#studentDashboard .nav-link').forEach(link => link.classList.remove('active'));
+            event.target.closest('.nav-link').classList.add('active');
+        }
+
+        // Image Upload Functions
+        function updateProfilePic(input, target) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (target === 'teacher') {
+                        document.getElementById('teacherAvatar').src = e.target.result;
+                    } else if (target === 'teacherProfile') {
+                        document.getElementById('teacherProfilePic').src = e.target.result;
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewStudentPic(input) {
+            const preview = document.getElementById('studentPreview');
+            const placeholder = document.getElementById('uploadPlaceholder');
+            const uploadArea = document.getElementById('studentUploadArea');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    uploadArea.classList.add('has-image');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Student Management
+        function addNewStudent(e) {
+            e.preventDefault();
+            
+            const newStudent = {
+                id: document.getElementById('newStudentID').value,
+                firstName: document.getElementById('newStudentFirstName').value,
+                lastName: document.getElementById('newStudentLastName').value,
+                lrn: document.getElementById('newStudentLRN').value,
+                grade: document.getElementById('newStudentGrade').value,
+                section: document.getElementById('newStudentSection').value,
+                strand: document.getElementById('newStudentStrand').value,
+                sy: document.getElementById('newStudentSY').value,
+                adviser: 'Mr. Reyes', // Current teacher
+                contact: document.getElementById('newStudentContact').value,
+                email: document.getElementById('newStudentEmail').value,
+                image: document.getElementById('studentPreview').src || ''
+            };
+            
+            students.push(newStudent);
+            alert('Student added successfully! ✅');
+            e.target.reset();
+            document.getElementById('studentPreview').classList.add('hidden');
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('studentUploadArea').classList.remove('has-image');
+            
+            renderStudentTable();
+            populateStudentSelect();
+        }
+
+        function renderStudentTable() {
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = students.map(student => `
+                <tr>
+                    <td>
+                        <div class="student-info">
+                            <img src="${student.image}" class="student-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+                            <div>
+                                <div style="font-weight: 700;">${student.firstName} ${student.lastName}</div>
+                                <small style="color: #64748b;">${student.id}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${student.lrn}</td>
+                    <td>${student.grade} - ${student.section}</td>
+                    <td><span class="grade-badge grade-very-satisfactory">${student.strand}</span></td>
+                    <td>${student.contact || 'N/A'}</td>
+                    <td class="action-btns">
+                        <button class="icon-btn view" onclick="viewStudent('${student.id}')">👁️</button>
+                        <button class="icon-btn edit">✏️</button>
+                        <button class="icon-btn delete" onclick="deleteStudent('${student.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function populateStudentSelect() {
+            const select = document.getElementById('gradeStudent');
+            select.innerHTML = '<option value="">Select Student</option>' + 
+                students.map(s => `<option value="${s.id}">${s.firstName} ${s.lastName}</option>`).join('');
+        }
+
+        function deleteStudent(id) {
+            if (confirm('Are you sure you want to remove this student?')) {
+                students = students.filter(s => s.id !== id);
+                renderStudentTable();
+                populateStudentSelect();
+            }
+        }
+
+        function viewStudent(id) {
+            const student = students.find(s => s.id === id);
+            if (student) {
+                alert(`Student Details:\n\nName: ${student.firstName} ${student.lastName}\nLRN: ${student.lrn}\nGrade: ${student.grade}\nSection: ${student.section}\nStrand: ${student.strand}\nAdviser: ${student.adviser}`);
+            }
+        }
+
+        function searchStudents(query) {
+            const rows = document.querySelectorAll('#studentTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        // Grade Management
+        function openGradeModal() {
+            document.getElementById('gradeModal').classList.add('active');
+        }
+
+        function closeGradeModal() {
+            document.getElementById('gradeModal').classList.remove('active');
+        }
+
+        function submitGrade(e) {
+            e.preventDefault();
+            
+            const studentId = document.getElementById('gradeStudent').value;
+            const subject = document.getElementById('gradeSubject').value;
+            const quarter = document.getElementById('gradeQuarter').value;
+            const grade = parseInt(document.getElementById('gradeValue').value);
+            const remarks = document.getElementById('gradeRemarks').value;
+            
+            const student = students.find(s => s.id === studentId);
+            const remarkData = getGradeRemark(grade);
+            
+            const tbody = document.getElementById('gradesTableBody');
+            const row = tbody.insertRow(0);
+            row.innerHTML = `
+                <td>
+                    <div class="student-info">
+                        <img src="${student?.image || ''}" class="student-avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👤</text></svg>'">
+                        <div>
+                            <div style="font-weight: 700;">${student ? student.firstName + ' ' + student.lastName : 'Unknown'}</div>
+                            <small style="color: #64748b;">${student ? student.grade + ' - ' + student.section : ''}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>${subject}</td>
+                <td>${quarter}</td>
+                <td><span class="grade-badge ${remarkData.class}">${grade}</span></td>
+                <td>${remarkData.text}</td>
+                <td class="action-btns">
+                    <button class="icon-btn edit">✏️</button>
+                    <button class="icon-btn delete" onclick="this.closest('tr').remove()">🗑️</button>
+                </td>
+            `;
+            
+            closeGradeModal();
+            e.target.reset();
+            alert('Grade saved successfully! ✅');
+        }
+
+        function switchTab(tab, type) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+        }
+
+        function renderStudentGrades() {
+            const container = document.getElementById('studentGradesContainer');
+            const subjects = [
+                { name: 'Mathematics', teacher: 'Mr. Reyes', schedule: 'MWF 9:00-10:00', grade: 92 },
+                { name: 'Science', teacher: 'Ms. Cruz', schedule: 'TTh 8:00-9:30', grade: 88 },
+                { name: 'English', teacher: 'Mrs. Tan', schedule: 'MWF 10:00-11:00', grade: 90 },
+                { name: 'Filipino', teacher: 'Mr. Garcia', schedule: 'TTh 9:30-11:00', grade: 85 },
+                { name: 'Araling Panlipunan', teacher: 'Ms. Lopez', schedule: 'MWF 1:00-2:00', grade: 87 },
+                { name: 'ESP', teacher: 'Mr. Santos', schedule: 'TTh 1:00-2:00', grade: 89 },
+                { name: 'TLE', teacher: 'Mrs. Reyes', schedule: 'MWF 2:00-3:00', grade: 91 },
+                { name: 'MAPEH', teacher: 'Ms. Cruz', schedule: 'TTh 2:00-3:30', grade: 88 }
+            ];
+            
+            container.innerHTML = subjects.map(sub => {
+                const remark = getGradeRemark(sub.grade);
+                return `
+                    <div class="subject-row">
+                        <div class="subject-info">
+                            <h4>${sub.name}</h4>
+                            <p>${sub.teacher} • ${sub.schedule}</p>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${sub.grade}%"></div>
+                            </div>
+                        </div>
+                        <div class="subject-grade">
+                            <div class="grade">${sub.grade}</div>
+                            <span class="grade-badge ${remark.class}">${remark.text}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
