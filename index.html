@@ -1744,8 +1744,8 @@
                     <label class="upload-btn" onclick="document.getElementById('teacherPicInput').click()">📷</label>
                     <input type="file" id="teacherPicInput" hidden accept="image/*" onchange="updateProfilePic(this, 'teacher')">
                 </div>
-                <div class="user-name" id="teacherName">Mr. Reyes</div>
-                <div class="user-role">Mathematics Faculty</div>
+                <div class="user-name" id="teacherName">Bonabel G Bontoyan</div>
+                <div class="user-role">HUMSS English Faculty</div>
             </div>
             
             <ul class="nav-menu">
@@ -2565,8 +2565,8 @@
                         <div class="form-group">
                             <label>Assign to Section *</label>
                             <select id="activitySection" required>
-                                <option>Grade 10 - Section A</option>
-                                <option>Grade 10 - Section B</option>
+                                <option>Grade 12 - JUSTICE</option>
+                                <option>Grade 10 - JUSTICE</option>
                                 <option>All Sections</option>
                             </select>
                         </div>
@@ -2663,16 +2663,16 @@
         let students = [
             {
                 id: 'S001',
-                firstName: 'Juan',
-                lastName: 'Dela Cruz',
+                firstName: 'John Louie',
+                lastName: 'Hernandez',
                 lrn: '123456789012',
-                grade: 'Grade 10',
-                section: 'Section A',
-                strand: 'STEM',
-                sy: '2023-2024',
-                adviser: 'Ms. Maria Santos',
+                grade: 'Grade 12',
+                section: 'JUSTICE',
+                strand: 'ICT',
+                sy: '2026-2027',
+                adviser: 'Ms. Bonabel G. Bontoyan',
                 contact: '0912 345 6789',
-                email: 'juan@example.com',
+                email: 'bel@example.com',
                 image: '',
                 scores: {
                     written: [85, 90, 88, 0, 0, 0, 0, 0, 0, 0],
@@ -2682,16 +2682,16 @@
             },
             {
                 id: 'S002',
-                firstName: 'Maria',
-                lastName: 'Santos',
+                firstName: 'Tine',
+                lastName: 'Cabate',
                 lrn: '123456789013',
-                grade: 'Grade 10',
-                section: 'Section A',
-                strand: 'STEM',
-                sy: '2023-2024',
-                adviser: 'Ms. Maria Santos',
-                contact: '0912 345 6790',
-                email: 'maria@example.com',
+                grade: 'Grade 12',
+                section: 'JUSTICE',
+                strand: 'ICT',
+                sy: '2026-2027',
+                adviser: 'Ms. Bonabel G. Bontoyan',
+                contact: '0912 345 6789',
+                email: 'bel@example.com',
                 image: '',
                 scores: {
                     written: [92, 88, 90, 0, 0, 0, 0, 0, 0, 0],
@@ -2706,22 +2706,22 @@
                 id: 1,
                 title: 'Quiz 1: Algebraic Expressions',
                 type: 'written',
-                subject: 'Mathematics',
+                subject: 'III',
                 totalPoints: 50,
                 deadline: '2023-10-25T23:59',
                 description: 'Simplify the following algebraic expressions and solve for x.',
-                section: 'Grade 10 - Section A',
+                section: 'Grade 12 - JUSTICE',
                 status: 'active'
             },
             {
                 id: 2,
                 title: 'Project: Real-world Math Application',
                 type: 'performance',
-                subject: 'Mathematics',
+                subject: 'III',
                 totalPoints: 100,
                 deadline: '2023-11-01T23:59',
                 description: 'Create a presentation showing real-world applications of linear equations.',
-                section: 'Grade 10 - Section A',
+                section: 'Grade 12 - JUSTICE',
                 status: 'active'
             }
         ];
@@ -2731,7 +2731,7 @@
                 id: 1,
                 activityId: 1,
                 studentId: 'S001',
-                studentName: 'Juan Dela Cruz',
+                studentName: 'John Louie Hernandez',
                 submittedAt: '2023-10-25T14:30',
                 content: 'Here are my answers to the quiz...',
                 attachments: ['quiz1_answers.pdf'],
@@ -2743,7 +2743,7 @@
                 id: 2,
                 activityId: 1,
                 studentId: 'S002',
-                studentName: 'Maria Santos',
+                studentName: 'Tine Cabate',
                 submittedAt: '2023-10-25T10:15',
                 content: 'Quiz answers attached.',
                 attachments: ['santos_quiz1.docx'],
@@ -3343,7 +3343,7 @@
                 id: submissions.length + 1,
                 activityId: activityId,
                 studentId: 'S001',
-                studentName: 'Juan Dela Cruz',
+                studentName: 'John Louie Hernandez',
                 submittedAt: new Date().toISOString(),
                 content: content,
                 attachments: [],
@@ -3611,3 +3611,4 @@
 </body>
 
 </html>
+
