@@ -1669,7 +1669,7 @@
                     <img src="logo.png" alt="School Logo" class="school-logo" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏫</text></svg>'">
                 </div>
                 <div class="school-name">Pasay City South<br>High School</div>
-                <div class="school-motto">"Building Futures, Shaping Leaders"</div>
+                <div class="school-motto">"Integrated, Grading Portal"</div>
             </div>
             
             <div class="login-form-section">
@@ -1796,7 +1796,7 @@
                         <span class="live-dot"></span>
                         Live
                     </span>
-                    <span style="color: #64748b; font-weight: 500;">School Year: 2023-2024</span>
+                    <span style="color: #64748b; font-weight: 500;">School Year: 2026-2027</span>
                     <button class="logout-btn" onclick="logout()">🚪 Logout</button>
                 </div>
             </div>
@@ -1808,7 +1808,7 @@
                         <div class="stat-header">
                             <div>
                                 <div class="stat-title">Total Students</div>
-                                <div class="stat-value">42</div>
+                                <div class="stat-value">37</div>
                                 <div class="stat-change">↑ 3 transferees</div>
                             </div>
                             <div class="stat-icon blue">👨‍🎓</div>
@@ -1866,12 +1866,14 @@
                         <h3 class="card-title">📋 Class Record Sheet - Mathematics</h3>
                         <div style="display: flex; gap: 10px;">
                             <select class="filter-select">
-                                <option>Grade 10 - Section A</option>
-                                <option>Grade 10 - Section B</option>
+                                <option>Grade 12 - JUSTICE</option>
+                                <option>Grade 12 - KINDNESS</option>
                             </select>
                             <select class="filter-select">
                                 <option>1st Quarter</option>
                                 <option>2nd Quarter</option>
+                                <option>3st Quarter</option>
+                                <option>4nd Quarter</option>
                             </select>
                         </div>
                     </div>
@@ -1879,15 +1881,15 @@
                     <div class="component-tabs">
                         <div class="component-tab written active" onclick="switchComponent('written', this)">
                             <div class="tab-title">📝 Written Works</div>
-                            <div class="tab-weight">40% of Total Grade</div>
+                            <div class="tab-weight">25% of Total Grade</div>
                         </div>
                         <div class="component-tab performance" onclick="switchComponent('performance', this)">
                             <div class="tab-title">🎯 Performance Tasks</div>
-                            <div class="tab-weight">40% of Total Grade</div>
+                            <div class="tab-weight">45% of Total Grade</div>
                         </div>
                         <div class="component-tab quarterly" onclick="switchComponent('quarterly', this)">
                             <div class="tab-title">📊 Quarterly Assessment</div>
-                            <div class="tab-weight">20% of Total Grade</div>
+                            <div class="tab-weight">30% of Total Grade</div>
                         </div>
                     </div>
 
@@ -2014,8 +2016,8 @@
                             <input type="text" class="search-box" placeholder="🔍 Search students..." onkeyup="searchStudents(this.value)">
                             <select class="filter-select">
                                 <option>All Sections</option>
-                                <option>Grade 10-A</option>
-                                <option>Grade 10-B</option>
+                                <option>Grade 12-JUSTICE</option>
+                                <option>Grade 12-KINDNESS</option>
                             </select>
                         </div>
                     </div>
@@ -2093,15 +2095,15 @@
                                     <option>STEM</option>
                                     <option>ABM</option>
                                     <option>HUMSS</option>
-                                    <option>GAS</option>
-                                    <option>TVL</option>
-                                    <option>Arts & Design</option>
-                                    <option>Sports</option>
+                                     <option>ICT</option>
+                                    <option>HE</option>
+                                 
+                                  
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>School Year *</label>
-                                <input type="text" id="newStudentSY" required placeholder="e.g., 2023-2024" value="2023-2024">
+                                <input type="text" id="newStudentSY" required placeholder="e.g., 2026-2027" value="2026-2027">
                             </div>
                         </div>
 
@@ -2143,13 +2145,13 @@
                             <input type="file" id="teacherProfilePicInput" hidden accept="image/*" onchange="updateProfilePic(this, 'teacherProfile')">
                         </div>
                         <div class="profile-details">
-                            <h2 id="profileTeacherName">Mr. Juan Reyes</h2>
+                            <h2 id="profileTeacherName">Mr. Arrieta, Ramilito</h2>
                             <p class="subtitle" id="profileTeacherRank">Master Teacher I</p>
                             
                             <div class="info-grid">
                                 <div class="info-item">
                                     <div class="info-label">Faculty Department</div>
-                                    <div class="info-value" id="profileFaculty">Mathematics Department</div>
+                                    <div class="info-value" id="profileFaculty">HUMSS ENGLISH DEPARTMENT</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Teacher Mastery</div>
@@ -2157,15 +2159,15 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Sections Handled</div>
-                                    <div class="info-value" id="profileSections">Grade 10-A, 10-B</div>
+                                    <div class="info-value" id="profileSections">Grade 12-JUSTICE, 12-KINDNESS</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Strand</div>
-                                    <div class="info-value" id="profileStrand">STEM / ABM</div>
+                                    <div class="info-value" id="profileStrand">ICT / ABM</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">School Year</div>
-                                    <div class="info-value">2023-2024</div>
+                                    <div class="info-value">2026-2027</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Contact</div>
@@ -2186,8 +2188,8 @@
                 <div class="profile-image-container">
                     <img src="" alt="Profile" class="user-avatar" id="studentAvatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22  viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍🎓</text></svg>'">
                 </div>
-                <div class="user-name" id="studentSidebarName">Juan Dela Cruz</div>
-                <div class="user-role" id="studentSidebarInfo">Grade 10 - STEM</div>
+                <div class="user-name" id="studentSidebarName">John Louie Hernandez</div>
+                <div class="user-role" id="studentSidebarInfo">Grade 12 - ICT</div>
             </div>
             
             <ul class="nav-menu">
@@ -2236,7 +2238,7 @@
                         <div class="stat-header">
                             <div>
                                 <div class="stat-title">General Average</div>
-                                <div class="stat-value" id="studentGenAvg">88.5</div>
+                                <div class="stat-value" id="studentGenAvg">90.5</div>
                                 <div class="stat-change">With Honors 🏆</div>
                             </div>
                             <div class="stat-icon green">🎖️</div>
@@ -2247,8 +2249,8 @@
                         <div class="stat-header">
                             <div>
                                 <div class="stat-title">Written Works Avg</div>
-                                <div class="stat-value">87.3</div>
-                                <div class="stat-change">40% weight</div>
+                                <div class="stat-value">87</div>
+                                <div class="stat-change">25% weight</div>
                             </div>
                             <div class="stat-icon purple">📝</div>
                         </div>
@@ -2259,7 +2261,7 @@
                             <div>
                                 <div class="stat-title">Performance Tasks</div>
                                 <div class="stat-value">89.1</div>
-                                <div class="stat-change">40% weight</div>
+                                <div class="stat-change">45% weight</div>
                             </div>
                             <div class="stat-icon cyan">🎯</div>
                         </div>
@@ -2269,8 +2271,8 @@
                         <div class="stat-header">
                             <div>
                                 <div class="stat-title">Quarterly Exam</div>
-                                <div class="stat-value">90</div>
-                                <div class="stat-change">20% weight</div>
+                                <div class="stat-value">45</div>
+                                <div class="stat-change">30% weight</div>
                             </div>
                             <div class="stat-icon orange">📊</div>
                         </div>
@@ -2332,45 +2334,45 @@
                         <div class="schedule-time">7:30-8:30</div>
                         <div class="schedule-subject">
                             <div class="subject-name">Homeroom</div>
-                            <div class="teacher-name">Ms. Cruz</div>
+                            <div class="teacher-name">Ms. Bontoyan</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Science</div>
-                            <div class="teacher-name">Ms. Cruz</div>
+                            <div class="subject-name">III</div>
+                            <div class="teacher-name">Mr. Arrieta</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Homeroom</div>
-                            <div class="teacher-name">Ms. Cruz</div>
+                            <div class="subject-name">CPAR</div>
+                            <div class="teacher-name">Ms. Bontoyan</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Science</div>
-                            <div class="teacher-name">Ms. Cruz</div>
+                            <div class="subject-name">Animation</div>
+                            <div class="teacher-name">Mr. Abella</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">ESP</div>
-                            <div class="teacher-name">Mr. Santos</div>
+                            <div class="subject-name">PS</div>
+                            <div class="teacher-name">Mrs. Recongko</div>
                         </div>
 
                         <div class="schedule-time">8:30-9:30</div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Mathematics</div>
-                            <div class="teacher-name">Mr. Reyes</div>
+                            <div class="subject-name">Entrep</div>
+                            <div class="teacher-name">Mrs. Garcia</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Filipino</div>
-                            <div class="teacher-name">Mr. Garcia</div>
+                            <div class="subject-name">P.E</div>
+                            <div class="teacher-name">Mrs. Festin</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Mathematics</div>
-                            <div class="teacher-name">Mr. Reyes</div>
+                            <div class="subject-name">Animation</div>
+                            <div class="teacher-name">Mr. Abella</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">Filipino</div>
-                            <div class="teacher-name">Mr. Garcia</div>
+                            <div class="subject-name">Animation</div>
+                            <div class="teacher-name">Mr. Abella</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">TLE</div>
-                            <div class="teacher-name">Mrs. Reyes</div>
+                            <div class="subject-name">III</div>
+                            <div class="teacher-name">Mr. Arrieta</div>
                         </div>
 
                         <div class="schedule-time">9:30-10:00</div>
@@ -2380,24 +2382,24 @@
 
                         <div class="schedule-time">10:00-11:00</div>
                         <div class="schedule-subject">
-                            <div class="subject-name">English</div>
-                            <div class="teacher-name">Mrs. Tan</div>
+                            <div class="subject-name">JAVA</div>
+                            <div class="teacher-name">Mr. Almedora</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">AP</div>
-                            <div class="teacher-name">Ms. Lopez</div>
+                            <div class="subject-name">JAVA</div>
+                            <div class="teacher-name">Mr. Almedora</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">English</div>
-                            <div class="teacher-name">Mrs. Tan</div>
+                            <div class="subject-name">HTML</div>
+                            <div class="teacher-name">Mr. Almedora</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">AP</div>
-                            <div class="teacher-name">Ms. Lopez</div>
+                            <div class="subject-name">HTML</div>
+                            <div class="teacher-name">Mr. Almedora</div>
                         </div>
                         <div class="schedule-subject">
-                            <div class="subject-name">MAPEH</div>
-                            <div class="teacher-name">Ms. Cruz</div>
+                            <div class="subject-name">HOMEROOM</div>
+                            <div class="teacher-name">Ms. Bontoyan</div>
                         </div>
                     </div>
                 </div>
@@ -2460,7 +2462,7 @@
                         </div>
                         <div class="profile-details">
                             <h2 id="profileStudentName">Juan Dela Cruz</h2>
-                            <p class="subtitle" id="profileStudentSection">Grade 10 - Section A | STEM</p>
+                            <p class="subtitle" id="profileStudentSection">Grade 12 - JUSTICE | ICT</p>
                             
                             <div class="info-grid">
                                 <div class="info-item">
@@ -2473,19 +2475,19 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Grade & Section</div>
-                                    <div class="info-value" id="profileGradeSection">Grade 10 - Section A</div>
+                                    <div class="info-value" id="profileGradeSection">Grade 12 - JUSTICE</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Strand</div>
-                                    <div class="info-value" id="profileStrand">STEM</div>
+                                    <div class="info-value" id="profileStrand">ICT</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">School Year</div>
-                                    <div class="info-value">2023-2024</div>
+                                    <div class="info-value">2026-2027</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="info-label">Adviser</div>
-                                    <div class="info-value" id="profileAdviser">Ms. Maria Santos</div>
+                                    <div class="info-value" id="profileAdviser">Ms. Bonabel Bontoyan</div>
                                 </div>
                             </div>
                         </div>
@@ -2523,10 +2525,10 @@
                         <div class="form-group">
                             <label>Subject *</label>
                             <select id="activitySubject" required>
-                                <option>Mathematics</option>
-                                <option>Science</option>
-                                <option>English</option>
-                                <option>Filipino</option>
+                                <option>III</option>
+                                <option>ANIMATION</option>
+                                <option>JAVA</option>
+                                <option>HTML</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -3607,4 +3609,5 @@
         }
     </script>
 </body>
+
 </html>
